@@ -8,7 +8,7 @@
 #include <string>
 #include <variant>
 #include <vector>
-namespace minecraft::nbt {
+namespace castle::nbt {
 
   template <typename T> T toNbtLength(size_t length);
 
@@ -48,8 +48,8 @@ namespace minecraft::nbt {
                                 std::vector<int64_t>>;
 
   struct Nbt {
-      minecraft::nbt::NbtTag tag;
-      minecraft::nbt::TagContext context;
+      castle::nbt::NbtTag tag;
+      castle::nbt::TagContext context;
       std::optional<std::string> name;
       NbtValue value;
   };
@@ -67,7 +67,7 @@ namespace minecraft::nbt {
                  std::vector<uint8_t>& data,
                  TagContext context = TagContext::Named);
 
-  void ToTagShort(std::string name,
+  void ToTagShort(const std::string& name,
                   int16_t value,
                   std::vector<std::uint8_t>& data,
                   TagContext context = TagContext::Named);
@@ -93,7 +93,7 @@ namespace minecraft::nbt {
                    TagContext context = TagContext::Named);
 
   void ToTagByteArray(const std::string& name,
-                      uint8_t value,
+                      const std::vector<int8_t>& values,
                       std::vector<uint8_t>& data,
                       TagContext context = TagContext::Named);
 
@@ -132,4 +132,5 @@ namespace minecraft::nbt {
                       std::vector<uint8_t>& data,
                       TagContext context = TagContext::Named);
 
-} // namespace minecraft::nbt
+  void writeNbt(const Nbt& node, std::vector<uint8_t>& data);
+} // namespace castle::nbt

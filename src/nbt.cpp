@@ -1,17 +1,11 @@
-#include "endian.hpp"
+#include "castle/nbt.hpp"
 #include <algorithm>
-#include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <limits>
-#include <nbt/nbt.hpp>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
-#include <variant>
 #include <vector>
 
-namespace minecraft::nbt {
+namespace castle::nbt {
   void writeNbt(const Nbt& node, std::vector<uint8_t>& data) {
     switch (node.tag) {
     case NbtTag::EndTag:
@@ -35,8 +29,11 @@ namespace minecraft::nbt {
     case NbtTag::DoubleTag:
       ToTagDouble(node.name.value_or(""), std::get<double>(node.value), data, node.context);
       break;
-    case NbtTag::ByteArrayTag:
+    case NbtTag::ByteArrayTag: {
+      const std::vector<int8_t>& values = std::get<std::vector<int8_t>>(node.value);
+      ToTagByteArray(node.name.value_or(""), values, data, node.context);
       break;
+    }
     case NbtTag::StringTag: {
       const std::string& value = std::get<std::string>(node.value);
 
@@ -48,7 +45,7 @@ namespace minecraft::nbt {
       const std::vector<Nbt>& values = std::get<std::vector<Nbt>>(node.value);
 
       bool allSameTag =
-          values.empty() || std::all_of(values.begin(), values.end(), [&](const Nbt& u) {
+          values.empty() || std::all_of(values.begin() + 1, values.end(), [&](const Nbt& u) {
             return u.tag == values.front().tag;
           });
 
@@ -82,10 +79,21 @@ namespace minecraft::nbt {
 
       break;
     }
-    case NbtTag::IntArrayTag:
+    case NbtTag::IntArrayTag: {
+
+      const std::vector<int32_t>& values = std::get<std::vector<int32_t>>(node.value);
+      ToTagIntArray(node.name.value_or(""), values, data, node.context);
       break;
-    case NbtTag::LongArrayTag:
+    }
+    case NbtTag::LongArrayTag: {
+
+      const std::vector<int64_t>& values = std::get<std::vector<int64_t>>(node.value);
+      ToTagLongArray(node.name.value_or(""), values, data, node.context);
+      break;
+    }
+    default:
+      throw std::runtime_error("not a vailed tag type");
       break;
     }
   }
-} // namespace minecraft::nbt
+} // namespace castle::nbt

@@ -1,14 +1,14 @@
 #include "endian.hpp"
+#include <castle/nbt.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
-#include <nbt/nbt.hpp>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <vector>
 
-namespace minecraft::nbt {
+namespace castle::nbt {
 
   template <typename T> T toNbtLength(size_t length) {
 
@@ -129,9 +129,19 @@ namespace minecraft::nbt {
   }
 
   void ToTagByteArray(const std::string& name,
-                      const std::vector<int8_t>& value,
+                      const std::vector<int8_t>& values,
                       std::vector<uint8_t>& data,
                       TagContext context) {
+
+    insertNameAndTag<NbtTag::ByteArrayTag>(name, data, context);
+
+    const int32_t size = toNbtLength<int32_t>(values.size());
+
+    endian::writeBigEndian(static_cast<uint32_t>(size), data);
+
+    for (int8_t value : values) {
+      data.push_back(static_cast<uint8_t>(value));
+    }
   }
 
   void ToTagString(const std::string& name,
@@ -202,4 +212,4 @@ namespace minecraft::nbt {
     }
   }
 
-} // namespace minecraft::nbt
+} // namespace castle::nbt
