@@ -14,11 +14,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Library
 add_library(castleNBT STATIC
     src/endian.cpp
-    src/nbt.cpp
+    src/writeNbt.cpp
 )
 
 target_include_directories(castleNBT
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_compile_features(castleNBT PUBLIC cxx_std_23)
