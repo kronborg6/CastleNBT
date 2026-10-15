@@ -13,35 +13,37 @@ void printHex(const std::vector<uint8_t>& data) {
 
 int main(void) {
 
-  castle::nbt::Nbt nbt{
-      .tag = castle::nbt::NbtTag::CompoundTag,
-      .context = castle::nbt::TagContext::Named,
-      .name = "",
-      .value = std::vector<castle::nbt::Nbt>{
-          castle::nbt::Nbt{.tag = castle::nbt::NbtTag::StringTag,
-                           .context = castle::nbt::TagContext::Named,
-                           .name = "name",
-                           .value = "Kronborg"},
-          castle::nbt::Nbt{.tag = castle::nbt::NbtTag::CompoundTag,
-                           .context = castle::nbt::TagContext::Named,
-                           .name = "stats",
-                           .value = std::vector<castle::nbt::Nbt>{
-                               castle::nbt::Nbt{.tag = castle::nbt::NbtTag::FloatTag,
-                                                .context = castle::nbt::TagContext::Named,
-                                                .name = "health",
-                                                .value = 100.0f},
-                               castle::nbt::Nbt{.tag = castle::nbt::NbtTag::IntTag,
-                                                .context = castle::nbt::TagContext::Named,
-                                                .name = "mana",
-                                                .value = 420},
-                               castle::nbt::Nbt{.tag = castle::nbt::NbtTag::IntTag,
-                                                .context = castle::nbt::TagContext::Named,
-                                                .name = "xp",
-                                                .value = 1231}}}}};
+  castle::nbt::Nbt root = castle::nbt::makeCompound("");
+
+  castle::nbt::Nbt name =
+      castle::nbt::Nbt{.tag = castle::nbt::NbtTag::StringTag, .name = "name", .value = "Kronborg"};
+
+  castle::nbt::Nbt stats = castle::nbt::makeCompound("stats");
+  castle::nbt::Nbt health = {
+      .tag = castle::nbt::NbtTag::FloatTag, .name = "health", .value = 100.0f};
+  castle::nbt::Nbt mana = {.tag = castle::nbt::NbtTag::IntTag, .name = "mana", .value = 420};
+  castle::nbt::Nbt xp = {.tag = castle::nbt::NbtTag::IntTag, .name = "xp", .value = 1231};
+  castle::nbt::Nbt items = {.tag = castle::nbt::NbtTag::ListTag,
+                            .name = "inventory",
+                            .value = std::vector<castle::nbt::Nbt>{}};
+
+  castle::nbt::Nbt itemOne = castle::nbt::makeString("weapon", "sword");
+  castle::nbt::Nbt itemTwo = castle::nbt::makeString("weapon", "staff");
+
+  items.append(itemOne);
+  items.append(itemTwo);
+  root.add(name);
+
+  stats.add(health);
+  stats.add(mana);
+  stats.add(xp);
+
+  root.add(stats);
+  root.add(items);
 
   std::vector<uint8_t> data;
 
-  castle::nbt::writeNbt(nbt, data);
+  castle::nbt::writeNbt(root, data);
 
   printHex(data);
   return 0;

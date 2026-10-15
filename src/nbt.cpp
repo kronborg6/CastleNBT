@@ -6,38 +6,38 @@
 #include <vector>
 
 namespace castle::nbt {
-  void writeNbt(const Nbt& node, std::vector<uint8_t>& data) {
+  void writeNbt(const Nbt& node, std::vector<uint8_t>& data, TagContext context) {
     switch (node.tag) {
     case NbtTag::EndTag:
       ToEndTag(data);
       break;
     case NbtTag::ByteTag:
-      ToTagByte(node.name.value_or(""), std::get<int8_t>(node.value), data, node.context);
+      ToTagByte(node.name.value_or(""), std::get<int8_t>(node.value), data, context);
       break;
     case NbtTag::ShortTag:
-      ToTagShort(node.name.value_or(""), std::get<int16_t>(node.value), data, node.context);
+      ToTagShort(node.name.value_or(""), std::get<int16_t>(node.value), data, context);
       break;
     case NbtTag::IntTag:
-      ToTagInt(node.name.value_or(""), std::get<int32_t>(node.value), data, node.context);
+      ToTagInt(node.name.value_or(""), std::get<int32_t>(node.value), data, context);
       break;
     case NbtTag::LongTag:
-      ToTagLong(node.name.value_or(""), std::get<int64_t>(node.value), data, node.context);
+      ToTagLong(node.name.value_or(""), std::get<int64_t>(node.value), data, context);
       break;
     case NbtTag::FloatTag:
-      ToTagFloat(node.name.value_or(""), std::get<float>(node.value), data, node.context);
+      ToTagFloat(node.name.value_or(""), std::get<float>(node.value), data, context);
       break;
     case NbtTag::DoubleTag:
-      ToTagDouble(node.name.value_or(""), std::get<double>(node.value), data, node.context);
+      ToTagDouble(node.name.value_or(""), std::get<double>(node.value), data, context);
       break;
     case NbtTag::ByteArrayTag: {
       const std::vector<int8_t>& values = std::get<std::vector<int8_t>>(node.value);
-      ToTagByteArray(node.name.value_or(""), values, data, node.context);
+      ToTagByteArray(node.name.value_or(""), values, data, context);
       break;
     }
     case NbtTag::StringTag: {
       const std::string& value = std::get<std::string>(node.value);
 
-      ToTagString(node.name.value_or(""), value, data, node.context);
+      ToTagString(node.name.value_or(""), value, data, context);
 
       break;
     }
@@ -55,20 +55,17 @@ namespace castle::nbt {
 
       NbtTag valueType = !values.empty() ? values.front().tag : NbtTag::EndTag;
 
-      ToTagList(node.name.value_or(""), valueType, values.size(), data, node.context);
+      ToTagList(node.name.value_or(""), valueType, values.size(), data, context);
 
       for (const Nbt& value : values) {
-        Nbt listValue = value;
 
-        listValue.context = TagContext::ListElement;
-
-        writeNbt(listValue, data);
+        writeNbt(value, data, TagContext::ListElement);
       }
 
       break;
     }
     case NbtTag::CompoundTag: {
-      ToTagCompound(node.name.value_or(""), data, node.context);
+      ToTagCompound(node.name.value_or(""), data, context);
 
       const std::vector<Nbt>& values = std::get<std::vector<Nbt>>(node.value);
 
@@ -82,18 +79,34 @@ namespace castle::nbt {
     case NbtTag::IntArrayTag: {
 
       const std::vector<int32_t>& values = std::get<std::vector<int32_t>>(node.value);
-      ToTagIntArray(node.name.value_or(""), values, data, node.context);
+      ToTagIntArray(node.name.value_or(""), values, data, context);
       break;
     }
     case NbtTag::LongArrayTag: {
 
       const std::vector<int64_t>& values = std::get<std::vector<int64_t>>(node.value);
-      ToTagLongArray(node.name.value_or(""), values, data, node.context);
+      ToTagLongArray(node.name.value_or(""), values, data, context);
       break;
     }
     default:
       throw std::runtime_error("not a vailed tag type");
       break;
     }
+  }
+
+  Nbt makeCompound(std::string name) {
+    return Nbt{
+        .tag = NbtTag::CompoundTag,
+        .name = name,
+        .value = std::vector<Nbt>{},
+    };
+  }
+
+  Nbt makeString(std::string name, std::string value) {
+    return Nbt{
+        .tag = NbtTag::StringTag,
+        .name = name,
+        .value = value,
+    };
   }
 } // namespace castle::nbt
