@@ -13,12 +13,12 @@ void printHex(const std::vector<uint8_t>& data) {
 
 int main(void) {
 
-  castle::nbt::Nbt root = castle::nbt::makeCompound("");
+  castle::nbt::Nbt root = castle::nbt::Nbt::makeCompound("");
 
   castle::nbt::Nbt name =
       castle::nbt::Nbt{.tag = castle::nbt::NbtTag::StringTag, .name = "name", .value = "Kronborg"};
 
-  castle::nbt::Nbt stats = castle::nbt::makeCompound("stats");
+  castle::nbt::Nbt stats = castle::nbt::Nbt::makeCompound("stats");
   castle::nbt::Nbt health = {
       .tag = castle::nbt::NbtTag::FloatTag, .name = "health", .value = 100.0f};
   castle::nbt::Nbt mana = {.tag = castle::nbt::NbtTag::IntTag, .name = "mana", .value = 420};
@@ -27,8 +27,8 @@ int main(void) {
                             .name = "inventory",
                             .value = std::vector<castle::nbt::Nbt>{}};
 
-  castle::nbt::Nbt itemOne = castle::nbt::makeString("weapon", "sword");
-  castle::nbt::Nbt itemTwo = castle::nbt::makeString("weapon", "staff");
+  castle::nbt::Nbt itemOne = castle::nbt::Nbt::makeString("weapon", "sword");
+  castle::nbt::Nbt itemTwo = castle::nbt::Nbt::makeString("weapon", "staff");
 
   items.append(itemOne);
   items.append(itemTwo);

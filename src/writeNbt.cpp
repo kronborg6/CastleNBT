@@ -5,6 +5,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -36,7 +37,7 @@ namespace castle::nbt {
 
   template <NbtTag Tag>
   constexpr void
-  insertNameAndTag(const std::string& name, std::vector<uint8_t>& data, TagContext context) {
+  insertNameAndTag(std::string_view name, std::vector<uint8_t>& data, TagContext context) {
     if (context == TagContext::ListElement || Tag == NbtTag::EndTag)
       return;
 
@@ -56,14 +57,14 @@ namespace castle::nbt {
   }
 
   void
-  ToTagByte(const std::string& name, int8_t value, std::vector<uint8_t>& data, TagContext context) {
+  ToTagByte(std::string_view name, int8_t value, std::vector<uint8_t>& data, TagContext context) {
 
     insertNameAndTag<NbtTag::ByteTag>(name, data, context);
 
     data.push_back(static_cast<uint8_t>(value));
   }
 
-  void ToTagShort(const std::string& name,
+  void ToTagShort(std::string_view name,
                   int16_t value,
                   std::vector<std::uint8_t>& data,
                   TagContext context) {
@@ -75,7 +76,7 @@ namespace castle::nbt {
     endian::writeBigEndian<uint16_t>(rawValue, data);
   }
 
-  void ToTagInt(const std::string& name,
+  void ToTagInt(std::string_view name,
                 int32_t value,
                 std::vector<std::uint8_t>& data,
                 TagContext context) {
@@ -87,7 +88,7 @@ namespace castle::nbt {
     endian::writeBigEndian<uint32_t>(rawValue, data);
   }
 
-  void ToTagLong(const std::string& name,
+  void ToTagLong(std::string_view name,
                  int64_t value,
                  std::vector<std::uint8_t>& data,
                  TagContext context) {
@@ -99,7 +100,7 @@ namespace castle::nbt {
     endian::writeBigEndian<uint64_t>(rawValue, data);
   }
 
-  void ToTagFloat(const std::string& name,
+  void ToTagFloat(std::string_view name,
                   float value,
                   std::vector<std::uint8_t>& data,
                   TagContext context) {
@@ -111,7 +112,7 @@ namespace castle::nbt {
     endian::writeBigEndian<uint32_t>(rawFloat, data);
   }
 
-  void ToTagDouble(const std::string& name,
+  void ToTagDouble(std::string_view name,
                    double value,
                    std::vector<std::uint8_t>& data,
                    TagContext context) {
@@ -123,12 +124,12 @@ namespace castle::nbt {
     endian::writeBigEndian<uint64_t>(rawFloat, data);
   }
 
-  void ToTagCompound(const std::string& name, std::vector<std::uint8_t>& data, TagContext context) {
+  void ToTagCompound(std::string_view name, std::vector<std::uint8_t>& data, TagContext context) {
 
     insertNameAndTag<NbtTag::CompoundTag>(name, data, context);
   }
 
-  void ToTagByteArray(const std::string& name,
+  void ToTagByteArray(std::string_view name,
                       const std::vector<int8_t>& values,
                       std::vector<uint8_t>& data,
                       TagContext context) {
@@ -144,7 +145,7 @@ namespace castle::nbt {
     }
   }
 
-  void ToTagString(const std::string& name,
+  void ToTagString(std::string_view name,
                    const std::string& value,
                    std::vector<std::uint8_t>& data,
                    TagContext context) {
@@ -159,7 +160,7 @@ namespace castle::nbt {
   }
 
   // template <NbtTag Tag>
-  void ToTagList(const std::string& name,
+  void ToTagList(std::string_view name,
                  NbtTag valueType,
                  size_t listLength,
                  std::vector<std::uint8_t>& data,
@@ -178,7 +179,7 @@ namespace castle::nbt {
     endian::writeBigEndian<uint32_t>(static_cast<uint32_t>(rawListLength), data);
   }
 
-  void ToTagIntArray(const std::string& name,
+  void ToTagIntArray(std::string_view name,
                      const std::vector<int32_t>& values,
                      std::vector<std::uint8_t>& data,
                      TagContext context) {
@@ -195,7 +196,7 @@ namespace castle::nbt {
     }
   }
 
-  void ToTagLongArray(const std::string& name,
+  void ToTagLongArray(std::string_view name,
                       const std::vector<int64_t>& values,
                       std::vector<std::uint8_t>& data,
                       TagContext context) {

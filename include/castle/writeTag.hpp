@@ -17,62 +17,62 @@ namespace castle::nbt {
 
   void ToEndTag(std::vector<uint8_t>& data);
 
-  void ToTagByte(const std::string& name,
+  void ToTagByte(std::string_view name,
                  int8_t value,
                  std::vector<uint8_t>& data,
                  TagContext context = TagContext::Named);
 
-  void ToTagShort(const std::string& name,
+  void ToTagShort(std::string_view name,
                   int16_t value,
                   std::vector<std::uint8_t>& data,
                   TagContext context = TagContext::Named);
 
-  void ToTagInt(const std::string& name,
+  void ToTagInt(std::string_view name,
                 int32_t value,
                 std::vector<std::uint8_t>& data,
                 TagContext context = TagContext::Named);
 
-  void ToTagLong(const std::string& name,
+  void ToTagLong(std::string_view name,
                  int64_t value,
                  std::vector<std::uint8_t>& data,
                  TagContext context = TagContext::Named);
 
-  void ToTagFloat(const std::string& name,
+  void ToTagFloat(std::string_view name,
                   float value,
                   std::vector<std::uint8_t>& data,
                   TagContext context = TagContext::Named);
 
-  void ToTagDouble(const std::string& name,
+  void ToTagDouble(std::string_view name,
                    double value,
                    std::vector<std::uint8_t>& data,
                    TagContext context = TagContext::Named);
 
-  void ToTagByteArray(const std::string& name,
+  void ToTagByteArray(std::string_view name,
                       const std::vector<int8_t>& values,
                       std::vector<uint8_t>& data,
                       TagContext context = TagContext::Named);
 
-  void ToTagString(const std::string& name,
+  void ToTagString(std::string_view name,
                    const std::string& value,
                    std::vector<std::uint8_t>& data,
                    TagContext context = TagContext::Named);
 
-  void ToTagList(const std::string& name,
+  void ToTagList(std::string_view name,
                  NbtTag valueType,
                  size_t listLength,
                  std::vector<uint8_t>& data,
                  TagContext context = TagContext::Named);
 
-  void ToTagCompound(const std::string& name,
+  void ToTagCompound(std::string_view name,
                      std::vector<std::uint8_t>& data,
                      TagContext context = TagContext::Named);
 
-  void ToTagIntArray(const std::string& name,
+  void ToTagIntArray(std::string_view name,
                      const std::vector<int32_t>& value,
                      std::vector<uint8_t>& data,
                      TagContext context = TagContext::Named);
 
-  void ToTagLongArray(const std::string& name,
+  void ToTagLongArray(std::string_view name,
                       const std::vector<int64_t>& value,
                       std::vector<uint8_t>& data,
                       TagContext context = TagContext::Named);

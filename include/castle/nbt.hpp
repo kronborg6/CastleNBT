@@ -1,9 +1,11 @@
 #pragma once
 
+#include <algorithm>
 #include <castle/writeTag.hpp>
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 namespace castle::nbt {
@@ -11,7 +13,8 @@ namespace castle::nbt {
   template <typename T> T toNbtLength(size_t length);
 
   enum class NbtTag : std::uint8_t {
-    EndTag = 0x00,
+    EndTag = 0x00, // noted used by user get set by writeNbt (should not be add self only in raw
+                   // function)
     ByteTag = 0x01,
     ShortTag = 0x02,
     IntTag = 0x03,
@@ -43,12 +46,45 @@ namespace castle::nbt {
 
   class Nbt {
     public:
-      std::optional<std::string> name;
+      static Nbt makeByte(std::string name, std::int8_t value);
+      static Nbt makeShort(std::string name, std::int16_t value);
+      static Nbt makeInt(std::string name, std::int32_t value);
+      static Nbt makeLong(std::string name, std::int64_t value);
+      static Nbt makeFloat(std::string name, float value);
+      static Nbt makeDouble(std::string name, double value);
+      static Nbt makeByteArray(std::string name, std::vector<std::int8_t> value = {});
+      static Nbt makeString(std::string name, std::string value = {});
+      static Nbt makeList(std::string name, std::vector<Nbt> value = {});
+      static Nbt makeCompound(std::string name, std::vector<Nbt> value = {});
+      static Nbt makeIntArray(std::string name, std::vector<std::int32_t> value = {});
+      static Nbt makeLongArray(std::string name, std::vector<std::int64_t> value = {});
 
       void add(Nbt child);
       void append(Nbt child);
 
+      NbtTag tag() const {
+        return _tag;
+      }
+
+      std::string_view name() const {
+        return _name;
+      }
+
+      void rename(std::string newName) {
+        _name = std::move(newName);
+      }
+      void clearName() {
+        _name.clear();
+      }
+
+      const NbtValue& value() const {
+        return _value;
+      }
+
     private:
+      Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value);
+
+      std::string _name = "";
       castle::nbt::NbtTag _tag;
       NbtValue _value;
   };
@@ -57,12 +93,9 @@ namespace castle::nbt {
 
   template <NbtTag Tag>
   constexpr void
-  insertNameAndTag(const std::string& name, std::vector<uint8_t>& data, TagContext context);
+  insertNameAndTag(std::string_view name, std::vector<uint8_t>& data, TagContext context);
 
   void
   writeNbt(const Nbt& node, std::vector<uint8_t>& data, TagContext context = TagContext::Named);
-
-  Nbt makeCompound(std::string name);
-  Nbt makeString(std::string name, std::string value);
 
 } // namespace castle::nbt
