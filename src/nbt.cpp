@@ -95,27 +95,17 @@ namespace castle::nbt {
     }
   }
 
-  // Nbt makeCompound(std::string name) {
-  //   return Nbt{
-  //       .tag = NbtTag::CompoundTag,
-  //       .name = std::move(name),
-  //       .value = std::vector<Nbt>{},
-  //   };
+  castle::nbt::Nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value)
+      : _name(name), _tag(tag), _value(value) {};
+
+  // castle::nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value) {
   // }
-  //
-  // Nbt makeCompound(std::string name, std::vector<Nbt> value) {
-  //   return Nbt{
-  //       .tag = NbtTag::CompoundTag,
-  //       .name = std::move(name),
-  //       .value = std::move(value),
-  //   };
-  // }
-  //
-  // Nbt makeString(std::string name, std::string value) {
-  //   return Nbt{
-  //       .tag = NbtTag::StringTag,
-  //       .name = name,
-  //       .value = value,
-  //   };
-  // }
+
+  Nbt castle::nbt::Nbt::makeCompound(std::string name, std::vector<Nbt> value) {
+    return Nbt(name, NbtTag::CompoundTag, value);
+  }
+  Nbt castle::nbt::Nbt::makeString(std::string name, std::string value) {
+    return Nbt(name, NbtTag::CompoundTag, value);
+  }
 } // namespace castle::nbt
+  //
