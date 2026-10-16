@@ -16,25 +16,24 @@ int main(void) {
   castle::nbt::Nbt root = castle::nbt::Nbt::makeCompound("");
 
   castle::nbt::Nbt name = castle::nbt::Nbt::makeString("name", "Kronborg");
-  // castle::nbt::Nbt{.tag = castle::nbt::NbtTag::StringTag, .name = "name", .value = "Kronborg"};
 
   castle::nbt::Nbt stats = castle::nbt::Nbt::makeCompound("stats");
-  // castle::nbt::Nbt health = {
-  //     .tag = castle::nbt::NbtTag::FloatTag, .name = "health", .value = 100.0f};
-  // castle::nbt::Nbt mana = {.tag = castle::nbt::NbtTag::IntTag, .name = "mana", .value = 420};
-  // castle::nbt::Nbt xp = {.tag = castle::nbt::NbtTag::IntTag, .name = "xp", .value = 1231};
-  // castle::nbt::Nbt items = {.tag = castle::nbt::NbtTag::ListTag,
-  //                           .name = "inventory",
-  //                           .value = std::vector<castle::nbt::Nbt>{}};
 
   castle::nbt::Nbt items = castle::nbt::Nbt::makeList("inventory");
+
   castle::nbt::Nbt itemOne = castle::nbt::Nbt::makeString("weapon", "sword");
   castle::nbt::Nbt itemTwo = castle::nbt::Nbt::makeString("weapon", "staff");
   auto itemThree = castle::nbt::makeNbt("Gun");
 
-  items.append(itemOne);
-  items.append(itemTwo);
-  items.append(itemThree);
+  std::vector<int32_t> temp = {12, 124, 11};
+
+  items.setValue(temp);
+
+  std::cout << "gg\n";
+
+  // items.append(itemOne);
+  // items.append(itemTwo);
+  // items.append(itemThree);
   // root.add(name);
   //
   // stats.add(health);
@@ -47,7 +46,10 @@ int main(void) {
 
   std::vector<uint8_t> data;
 
-  castle::nbt::writeNbt(root, data);
+  root.compile(data);
+
+  // castle::nbt::Nbt root = castle::nbt::Nbt::makeString("hello", "kronborg");
+  // castle::nbt::writeNbt(root, data, true);
 
   printHex(data);
   return 0;

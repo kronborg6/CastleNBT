@@ -7,6 +7,10 @@
 #include <vector>
 
 namespace castle::nbt {
+
+  void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data) {
+    writeNbt(Nbt::makeCompound("", std::vector<Nbt>{node}), data);
+  }
   void writeNbt(const Nbt& node, std::vector<uint8_t>& data, TagContext context) {
     switch (node.tag()) {
     case NbtTag::EndTag:

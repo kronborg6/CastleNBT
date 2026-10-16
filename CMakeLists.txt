@@ -13,12 +13,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Library
 add_library(castleNBT STATIC
+    src/createNbt.cpp
     src/endian.cpp
+    src/variable.cpp
     src/writeNbt.cpp
     src/writeTag.cpp
-    src/createNbt.cpp
     src/nbt.cpp
-    src/child.cpp
 )
 
 target_include_directories(castleNBT
@@ -36,3 +36,9 @@ add_executable(castleNBTTool
 target_link_libraries(castleNBTTool
     PRIVATE castleNBT
 )
+
+include(CTest)
+
+if(build_testing)
+    add_subdirectory(tests)
+endif()
