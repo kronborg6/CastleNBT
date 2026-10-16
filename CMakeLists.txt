@@ -16,6 +16,7 @@ add_library(castleNBT STATIC
     src/endian.cpp
     src/writeNbt.cpp
     src/writeTag.cpp
+    src/createNbt.cpp
     src/nbt.cpp
     src/child.cpp
 )

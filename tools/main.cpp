@@ -27,11 +27,14 @@ int main(void) {
   //                           .name = "inventory",
   //                           .value = std::vector<castle::nbt::Nbt>{}};
 
+  castle::nbt::Nbt items = castle::nbt::Nbt::makeList("inventory");
   castle::nbt::Nbt itemOne = castle::nbt::Nbt::makeString("weapon", "sword");
   castle::nbt::Nbt itemTwo = castle::nbt::Nbt::makeString("weapon", "staff");
+  auto itemThree = castle::nbt::makeNbt("Gun");
 
-  // items.append(itemOne);
-  // items.append(itemTwo);
+  items.append(itemOne);
+  items.append(itemTwo);
+  items.append(itemThree);
   // root.add(name);
   //
   // stats.add(health);
@@ -40,7 +43,7 @@ int main(void) {
 
   root.add(stats);
   root.add(name);
-  // root.add(items);
+  root.add(items);
 
   std::vector<uint8_t> data;
 

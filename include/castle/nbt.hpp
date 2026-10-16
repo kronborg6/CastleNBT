@@ -3,9 +3,11 @@
 #include <algorithm>
 #include <castle/writeTag.hpp>
 #include <cstdint>
-#include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
+#include <utility>
 #include <variant>
 #include <vector>
 namespace castle::nbt {
@@ -29,7 +31,7 @@ namespace castle::nbt {
     LongArrayTag = 0x0C,
   };
 
-  struct Nbt;
+  class Nbt;
 
   using NbtValue = std::variant<std::monostate,
                                 int8_t,
@@ -44,6 +46,8 @@ namespace castle::nbt {
                                 std::vector<int32_t>,
                                 std::vector<int64_t>>;
 
+  Nbt makeNbt(std::string name, const NbtValue& value);
+  Nbt makeNbt(const NbtValue& value);
   class Nbt {
     public:
       static Nbt makeByte(std::string name, std::int8_t value);
@@ -59,8 +63,55 @@ namespace castle::nbt {
       static Nbt makeIntArray(std::string name, std::vector<std::int32_t> value = {});
       static Nbt makeLongArray(std::string name, std::vector<std::int64_t> value = {});
 
-      void add(Nbt child);
-      void append(Nbt child);
+      template <typename T> void add(T child) {
+        if (_init == false) {
+          _tag = NbtTag::CompoundTag;
+          _init = true;
+          _name = "";
+          _value = std::vector<Nbt>();
+        }
+
+        auto* values = std::get_if<std::vector<Nbt>>(&_value);
+
+        if (values == nullptr) {
+          throw std::runtime_error("invalid container value");
+        }
+
+        if constexpr (std::is_same_v<T, Nbt>) {
+          values->push_back(std::move(child));
+        } else {
+          NbtValue value = child;
+          values->push_back(makeNbt(value));
+        }
+      }
+
+      template <typename T> void append(T child) {
+        if (_init == false) {
+          _tag = NbtTag::ListTag;
+          _init = true;
+          _name = "";
+          _value = std::vector<Nbt>();
+        }
+
+        auto* values = std::get_if<std::vector<Nbt>>(&_value);
+
+        if (values == nullptr) {
+          throw std::runtime_error("invalid container value");
+        }
+
+        if (_tag == NbtTag::ListTag && !values->empty() && child.tag() != values->front().tag()) {
+          throw std::runtime_error("all list elements must have the same tag");
+        }
+
+        if constexpr (std::is_same_v<T, Nbt>) {
+          values->push_back(std::move(child));
+        } else {
+
+          NbtValue value = child;
+
+          values->push_back(makeNbt(value));
+        }
+      }
 
       NbtTag tag() const {
         return _tag;
@@ -87,6 +138,7 @@ namespace castle::nbt {
       std::string _name = "";
       castle::nbt::NbtTag _tag;
       NbtValue _value;
+      bool _init = false;
   };
 
   constexpr std::uint8_t tag(NbtTag value) noexcept;

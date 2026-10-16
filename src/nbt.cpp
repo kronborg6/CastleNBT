@@ -96,16 +96,12 @@ namespace castle::nbt {
   }
 
   castle::nbt::Nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value)
-      : _name(name), _tag(tag), _value(value) {};
+      : _name(name), _tag(tag), _value(value) {
+    _init = true;
+  };
 
   // castle::nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value) {
   // }
 
-  Nbt castle::nbt::Nbt::makeCompound(std::string name, std::vector<Nbt> value) {
-    return Nbt(name, NbtTag::CompoundTag, value);
-  }
-  Nbt castle::nbt::Nbt::makeString(std::string name, std::string value) {
-    return Nbt(name, NbtTag::CompoundTag, value);
-  }
 } // namespace castle::nbt
   //
