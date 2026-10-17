@@ -1,6 +1,7 @@
 #include "castle/nbt.hpp"
 #include <cstdint>
 #include <gtest/gtest.h>
+#include <stdexcept>
 #include <vector>
 using castle::nbt::Nbt;
 TEST(NbtSerialization, EmptyRootCompound) {
@@ -275,6 +276,14 @@ TEST(NbtSerialization, EmptyList) {
   root.compile(result);
 
   EXPECT_EQ(result, expected);
+}
+
+TEST(NbtSerialization, ListRejectsDifferentTypes) {
+  auto list = Nbt::makeList("list");
+
+  list.append(Nbt::makeCompound(""));
+
+  EXPECT_THROW(list.append(Nbt::makeString("this does not matter")), std::runtime_error);
 }
 
 TEST(NbtSerialization, Compound) {
