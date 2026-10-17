@@ -57,6 +57,7 @@ int main(void) {
   Nbt compound2 = Nbt::makeCompound("user");
   compound2.add(Nbt::makeString("name", "Laura"));
   compound2.add(Nbt::makeInt("age", 22));
+  compound2.add(Nbt::makeInt("age", 22));
 
   list.append(std::move(compound1));
   list.append(std::move(compound2));
