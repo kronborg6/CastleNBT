@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.2)
+cmake_minimum_required(VERSION 3.24)
 
 project(
     castleNBT
@@ -28,17 +28,18 @@ target_include_directories(castleNBT
 
 target_compile_features(castleNBT PUBLIC cxx_std_23)
 
-# Executable
-add_executable(castleNBTTool
-    tools/main.cpp
-)
+if(PROJECT_IS_TOP_LEVEL)
+    add_executable(castleNBTTool
+        tools/main.cpp
+    )
 
-target_link_libraries(castleNBTTool
-    PRIVATE castleNBT
-)
+    target_link_libraries(castleNBTTool
+        PRIVATE castleNBT
+    )
 
-include(CTest)
+    include(CTest)
 
-if(BUILD_TESTING)
-    add_subdirectory(tests)
+    if(BUILD_TESTING)
+        add_subdirectory(tests)
+    endif()
 endif()
