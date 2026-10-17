@@ -39,6 +39,6 @@ target_link_libraries(castleNBTTool
 
 include(CTest)
 
-if(build_testing)
+if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()

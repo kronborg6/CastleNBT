@@ -117,7 +117,7 @@ namespace castle::nbt {
         }
 
         if constexpr (std::is_same_v<T, Nbt>) {
-          values->push_back(std::move(child));
+          values->push_back(nbt);
         } else {
 
           NbtValue value = child;
