@@ -233,23 +233,43 @@ TEST(NbtSerialization, List) {
 TEST(NbtSerialization, ListWithCompounds) {
   // clang-format off
   const std::vector<std::uint8_t> expected = {
-      0x0A, 0x00, 0x00,
-      0x09, 0x00, 0x04, 0x74, 0x65, 0x73, 0x74,
-      0x03,                                                                // List element type TAG_Int
-      0x00, 0x00, 0x00, 0x02,                               // List length = 2
-      0x00, 0x00, 0x00, 0x01,                               // First int
-      0x00, 0x00, 0x00, 0x02,                               // Second int
-      0x00
+      0x0A, 0x00, 0x00,                                             // Root compound
+      0x09, 0x00, 0x04, 0x6C, 0x69, 0x73, 0x74,     // List "list"
+      0x0A,                                                                // Element type: compound
+      0x00, 0x00, 0x00, 0x02,                               // Two elements
+
+      0x00,                                                                // First empty compound
+      0x00,                                                                // Second empty compound
+      0x00                                                                 // End root compound
   };
   // clang-format on
 
   auto root = Nbt::makeCompound("");
-  auto list = Nbt::makeList("test");
+  auto list = Nbt::makeList("list");
 
-  list.append(std::int32_t{1});
-  list.append(std::int32_t{2});
+  list.append(Nbt::makeCompound("this does not matter becus is gona be set to emty"));
+  list.append(Nbt::makeCompound("this does not matter becus is gona be set to emty"));
 
   root.add(std::move(list));
+
+  std::vector<std::uint8_t> result;
+  root.compile(result);
+
+  EXPECT_EQ(result, expected);
+}
+TEST(NbtSerialization, EmptyList) {
+  // clang-format off
+  const std::vector<std::uint8_t> expected = {
+      0x0A, 0x00, 0x00,                                             // Root compound
+      0x09, 0x00, 0x04, 0x6C, 0x69, 0x73, 0x74,     // List "list"
+      0x00,                                                                // TAG_End element type
+      0x00, 0x00, 0x00, 0x00,                               // Length = 0
+      0x00                                                                 // End root compound
+  };
+  // clang-format on
+
+  auto root = Nbt::makeCompound("");
+  root.add(Nbt::makeList("list"));
 
   std::vector<std::uint8_t> result;
   root.compile(result);
@@ -443,8 +463,7 @@ TEST(NbtSerialization, AllTagTypes) {
   root.add(Nbt::makeLongArray("longArray", {1, 256}));
 
   // Serialize
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = root.compile();
 
   ASSERT_EQ(result.size(), expected.size()) << "Serialized NBT size does not match";
 
@@ -452,4 +471,13 @@ TEST(NbtSerialization, AllTagTypes) {
     EXPECT_EQ(result[i], expected[i])
         << "Byte mismatch at offset " << i << " (0x" << std::hex << i << ")";
   }
+}
+TEST(NbtSerialization, AppendsToExistingBuffer) {
+  auto root = Nbt::makeCompound("");
+
+  std::vector<std::uint8_t> result = {0xAA};
+  root.compile(result);
+
+  ASSERT_FALSE(result.empty());
+  EXPECT_EQ(result.front(), 0xAA);
 }

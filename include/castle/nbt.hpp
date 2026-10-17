@@ -154,12 +154,28 @@ namespace castle::nbt {
         }
       }
 
-      void compile(std::vector<uint8_t>& output) {
+      /**
+       * @brief Compile the NBT tag into binary format and append it to output.
+       *
+       * @param output The vector to append the serialized bytes to.
+       */
+      void compile(std::vector<std::uint8_t>& output) {
         if (_tag != NbtTag::CompoundTag) {
           writeNbtDocument(*this, output);
         } else {
           writeNbt(*this, output);
         }
+      }
+
+      /**
+       * @brief Compile the NBT tag into binary format.
+       *
+       * @return std::vector<std::uint8_t> The serialized bytes.
+       */
+      std::vector<std::uint8_t> compile() {
+        std::vector<std::uint8_t> output;
+        compile(output);
+        return output;
       }
 
       NbtTag tag() const {
