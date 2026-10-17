@@ -76,7 +76,7 @@ CastleNBT is primarily a learning project created while developing
 ## Requirements
 
 - C++23 compatible compiler
-- CMake
+- CMake 3.24 or newer
 
 GoogleTest is required only when building the CastleNBT test suite.
 
