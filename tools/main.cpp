@@ -1,4 +1,6 @@
 #include <castle/nbt.hpp>
+#include <castle/readTag.hpp>
+#include <cstddef>
 #include <iomanip>
 #include <iostream>
 #include <utility>
@@ -16,7 +18,8 @@ void printHex(const std::vector<uint8_t>& data) {
 
 int main(void) {
 
-  castle::nbt::Nbt root = castle::nbt::Nbt::makeCompound("");
+  castle::nbt::Nbt root = castle::nbt::Nbt::makeByte("kronborg", 67);
+  // castle::nbt::Nbt root = castle::nbt::Nbt::makeCompound("");
 
   // castle::nbt::Nbt name = castle::nbt::Nbt::makeString("name", "Kronborg");
   //
@@ -49,25 +52,31 @@ int main(void) {
 
   // root.add(castle::nbt::Nbt::makeString("hello", "world"));
 
-  Nbt list = Nbt::makeList("list");
-  Nbt compound1 = Nbt::makeCompound("user");
-  compound1.add(Nbt::makeString("name", "Bob"));
-  compound1.add(Nbt::makeInt("age", 31));
-
-  Nbt compound2 = Nbt::makeCompound("user");
-  compound2.add(Nbt::makeString("name", "Laura"));
-  compound2.add(Nbt::makeInt("age", 22));
-  compound2.add(Nbt::makeInt("age", 22));
-
-  list.append(std::move(compound1));
-  list.append(std::move(compound2));
-  // list.append(compound1);
-  // list.append(compound2);
-
-  root.add(list);
+  // Nbt list = Nbt::makeList("list");
+  // Nbt compound1 = Nbt::makeCompound("user");
+  // compound1.add(Nbt::makeString("name", "Bob"));
+  // compound1.add(Nbt::makeInt("age", 31));
+  //
+  // Nbt compound2 = Nbt::makeCompound("user");
+  // compound2.add(Nbt::makeString("name", "Laura"));
+  // compound2.add(Nbt::makeInt("age", 22));
+  // compound2.add(Nbt::makeInt("age", 22));
+  //
+  // list.append(std::move(compound1));
+  // list.append(std::move(compound2));
+  // // list.append(compound1);
+  // // list.append(compound2);
+  //
+  // root.add(list);
   std::vector<uint8_t> data;
 
   root.compile(data);
+  std::span<const std::uint8_t> ro = data;
+
+  size_t offset = 3;
+  castle::nbt::Nbt w = castle::nbt::FromTagByte(ro, offset);
+
+  std::cout << "name is: " << w.name() << "\n ";
 
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeString("hello", "kronborg");
   // castle::nbt::writeNbt(root, data, true);

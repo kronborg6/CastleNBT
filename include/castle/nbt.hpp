@@ -1,7 +1,7 @@
 #pragma once
 
+#include "writeTag.hpp"
 #include <algorithm>
-#include <castle/writeTag.hpp>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
