@@ -18,7 +18,8 @@ void printHex(const std::vector<uint8_t>& data) {
 
 int main(void) {
 
-  castle::nbt::Nbt root = castle::nbt::Nbt::makeByte("kronborg", 67);
+  // castle::nbt::Nbt root = castle::nbt::Nbt::makeByte("kronborg", 67);
+  castle::nbt::Nbt root = castle::nbt::Nbt::makeShort("kronborg short", 3123);
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeCompound("");
 
   // castle::nbt::Nbt name = castle::nbt::Nbt::makeString("name", "Kronborg");
@@ -74,7 +75,7 @@ int main(void) {
   std::span<const std::uint8_t> ro = data;
 
   size_t offset = 3;
-  castle::nbt::Nbt w = castle::nbt::FromTagByte(ro, offset);
+  castle::nbt::Nbt w = castle::nbt::FromTagShort(ro, offset);
 
   std::cout << "name is: " << w.name() << "\n ";
 

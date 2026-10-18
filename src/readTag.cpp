@@ -5,6 +5,7 @@
 #include <cstring>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <string>
@@ -29,7 +30,17 @@ namespace castle::nbt {
     return Nbt::makeByte(name, value);
   }
 
-  inline Nbt FromTagShort(const std::vector<std::uint8_t>& data, std::size_t& offset) {
+  Nbt FromTagShort(std::span<const std::uint8_t> data, std::size_t& offset) {
+    NbtTag tag = static_cast<NbtTag>(data[offset++]);
+    uint16_t nameLength = endian::readBigEndian<uint16_t>(data, offset);
+
+    std::string name(data.begin() + offset, data.begin() + offset + nameLength);
+
+    offset += nameLength;
+
+    int16_t value = static_cast<int16_t>(endian::readBigEndian<uint16_t>(data, offset));
+
+    return Nbt::makeShort(std::move(name), value);
   }
 
   inline Nbt FromTagInt(const std::vector<std::uint8_t>& data, std::size_t& offset) {
@@ -67,7 +78,7 @@ namespace castle::nbt {
       return std::get<std::int8_t>(nbt::FromTagByte(data, offset).value());
     }
 
-    inline std::int16_t FromTagShort(const std::vector<std::uint8_t>& data, std::size_t& offset) {
+    inline std::int16_t FromTagShort(std::span<const std::uint8_t> data, std::size_t& offset) {
       return std::get<std::int8_t>(nbt::FromTagByte(data, offset).value());
     }
 

@@ -18,7 +18,7 @@ namespace castle::nbt {
 
   Nbt FromTagByte(std::span<const std::uint8_t> data, std::size_t& offset);
 
-  inline Nbt FromTagShort(const std::vector<std::uint8_t>& data, std::size_t& offset);
+  Nbt FromTagShort(std::span<const std::uint8_t> data, std::size_t& offset);
 
   inline Nbt FromTagInt(const std::vector<std::uint8_t>& data, std::size_t& offset);
 
