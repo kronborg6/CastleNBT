@@ -95,7 +95,7 @@ Nbt FromTagDouble(std::span<const std::uint8_t> &data, std::size_t &offset) {
 }
 
 Nbt FromTagByteArray(std::span<const uint8_t> &data, std::size_t &offset) {
-  std::string name = readTagHeader(data, offset, NbtTag::LongTag);
+  std::string name = readTagHeader(data, offset, NbtTag::ByteArrayTag);
 
   const size_t size =
       static_cast<size_t>(endian::readBigEndian<uint32_t>(data, offset));
@@ -108,7 +108,7 @@ Nbt FromTagByteArray(std::span<const uint8_t> &data, std::size_t &offset) {
 }
 
 Nbt FromTagString(std::span<const std::uint8_t> &data, std::size_t &offset) {
-  std::string name = readTagHeader(data, offset, NbtTag::LongTag);
+  std::string name = readTagHeader(data, offset, NbtTag::StringTag);
 
   uint16_t valueLengh = endian::readBigEndian<uint16_t>(data, offset);
 
@@ -119,23 +119,54 @@ Nbt FromTagString(std::span<const std::uint8_t> &data, std::size_t &offset) {
 }
 
 Nbt FromTagList(std::span<const uint8_t> &data, std::size_t &offset) {
+  std::string name = readTagHeader(data, offset, NbtTag::ListTag);
 
-  std::string name = readTagHeader(data, offset, NbtTag::LongTag);
+  NbtTag listType = static_cast<NbtTag>(data[offset++]);
+
+  std::size_t listLength =
+      static_cast<std::size_t>(endian::readBigEndian<uint32_t>(data, offset));
+
+  switch (listType) {
+  case NbtTag::IntTag: {
+
+    std::vector<int32_t> values;
+    break;
+  }
+  defualt:
+    break;
+  }
+  return Nbt::makeList(name);
 }
 
 Nbt FromTagCompound(std::span<const std::uint8_t> &data, size_t &offset) {
 
-  std::string name = readTagHeader(data, offset, NbtTag::LongTag);
+  std::string name = readTagHeader(data, offset, NbtTag::CompoundTag);
 }
 
 Nbt FromTagIntArray(std::span<const uint8_t> &data, std::size_t &offset) {
+  std::string name = readTagHeader(data, offset, NbtTag::IntArrayTag);
 
-  std::string name = readTagHeader(data, offset, NbtTag::LongTag);
+  const size_t size =
+      static_cast<size_t>(endian::readBigEndian<uint32_t>(data, offset));
+
+  std::vector<int32_t> values(data.begin() + offset,
+                              data.begin() + size + offset);
+  offset += size;
+
+  return Nbt::makeIntArray(std::move(name), std::move(values));
 }
 
 Nbt FromTagLongArray(std::span<const uint8_t> &data, std::size_t &offset) {
+  std::string name = readTagHeader(data, offset, NbtTag::LongArrayTag);
 
-  std::string name = readTagHeader(data, offset, NbtTag::LongTag);
+  const size_t size =
+      static_cast<size_t>(endian::readBigEndian<uint32_t>(data, offset));
+
+  std::vector<int64_t> values(data.begin() + offset,
+                              data.begin() + size + offset);
+  offset += size;
+
+  return Nbt::makeLongArray(std::move(name), std::move(values));
 }
 
 namespace value {

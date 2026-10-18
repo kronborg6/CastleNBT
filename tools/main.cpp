@@ -1,6 +1,7 @@
 #include <castle/nbt.hpp>
 #include <castle/readTag.hpp>
 #include <cstddef>
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <utility>
@@ -21,8 +22,9 @@ int main(void) {
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeByte("kronborg", 67);
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeShort("kronborg short",
   // 3123);
-  castle::nbt::Nbt root =
-      castle::nbt::Nbt::makeFloat("kronborg float", 312.123f);
+  // castle::nbt::Nbt root =
+  //     castle::nbt::Nbt::makeFloat("kronborg float", 312.123f);
+  castle::nbt::Nbt root = Nbt::makeList("kronborg list");
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeDouble("kronborg double",
   // 31223); castle::nbt::Nbt root = castle::nbt::Nbt::makeCompound("");
 
@@ -75,13 +77,16 @@ int main(void) {
   // root.add(list);
   std::vector<uint8_t> data;
 
+  root.append(int16_t{2312});
+  root.append(int16_t{-745});
+
   root.compile(data);
   std::span<const std::uint8_t> ro = data;
 
   size_t offset = 3;
-  castle::nbt::Nbt w = castle::nbt::FromTagFloat(ro, offset);
+  // castle::nbt::Nbt w = castle::nbt::FromTagList(ro, offset);
 
-  std::cout << "name is: " << w.name() << "\n ";
+  // std::cout << "name is: " << w.name() << "\n ";
 
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeString("hello", "kronborg");
   // castle::nbt::writeNbt(root, data, true);

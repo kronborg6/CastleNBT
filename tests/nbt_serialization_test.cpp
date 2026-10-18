@@ -209,7 +209,7 @@ TEST(NbtSerialization, List) {
   const std::vector<std::uint8_t> expected = {
       0x0A, 0x00, 0x00,
       0x09, 0x00, 0x04, 0x74, 0x65, 0x73, 0x74,
-      0x03,                                                                // List element type TAG_Int
+      0x03,                                                 // List element type TAG_Int
       0x00, 0x00, 0x00, 0x02,                               // List length = 2
       0x00, 0x00, 0x00, 0x01,                               // First int
       0x00, 0x00, 0x00, 0x02,                               // Second int
@@ -248,8 +248,10 @@ TEST(NbtSerialization, ListWithCompounds) {
   auto root = Nbt::makeCompound("");
   auto list = Nbt::makeList("list");
 
-  list.append(Nbt::makeCompound("this does not matter becus is gona be set to emty"));
-  list.append(Nbt::makeCompound("this does not matter becus is gona be set to emty"));
+  list.append(
+      Nbt::makeCompound("this does not matter becus is gona be set to emty"));
+  list.append(
+      Nbt::makeCompound("this does not matter becus is gona be set to emty"));
 
   root.add(std::move(list));
 
@@ -283,7 +285,8 @@ TEST(NbtSerialization, ListRejectsDifferentTypes) {
 
   list.append(Nbt::makeCompound(""));
 
-  EXPECT_THROW(list.append(Nbt::makeString("this does not matter")), std::runtime_error);
+  EXPECT_THROW(list.append(Nbt::makeString("this does not matter")),
+               std::runtime_error);
 }
 
 TEST(NbtSerialization, Compound) {
@@ -474,7 +477,8 @@ TEST(NbtSerialization, AllTagTypes) {
   // Serialize
   std::vector<std::uint8_t> result = root.compile();
 
-  ASSERT_EQ(result.size(), expected.size()) << "Serialized NBT size does not match";
+  ASSERT_EQ(result.size(), expected.size())
+      << "Serialized NBT size does not match";
 
   for (std::size_t i = 0; i < std::min(result.size(), expected.size()); ++i) {
     EXPECT_EQ(result[i], expected[i])
