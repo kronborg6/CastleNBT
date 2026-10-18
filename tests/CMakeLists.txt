@@ -13,6 +13,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(unit_tests
     nbt_serialization_test.cpp
     nbt_class_test.cpp
+    nbt_deserialization_test.cpp
 )
 
 

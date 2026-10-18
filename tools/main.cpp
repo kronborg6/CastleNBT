@@ -8,10 +8,10 @@
 #include <vector>
 
 using castle::nbt::Nbt;
-void printHex(const std::vector<uint8_t> &data) {
+void printHex(const std::vector<uint8_t>& data) {
   for (uint8_t byte : data) {
-    std::cout << "0x" << std::hex << std::setw(2) << std::setfill('0')
-              << static_cast<int>(byte) << ' ';
+    std::cout << "0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte)
+              << ' ';
   }
 
   std::cout << std::dec << '\n';
@@ -22,9 +22,8 @@ int main(void) {
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeByte("kronborg", 67);
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeShort("kronborg short",
   // 3123);
-  // castle::nbt::Nbt root =
-  //     castle::nbt::Nbt::makeFloat("kronborg float", 312.123f);
-  castle::nbt::Nbt root = Nbt::makeList("kronborg list");
+  castle::nbt::Nbt root = castle::nbt::Nbt::makeFloat("kronborg float", 312.123f);
+  // castle::nbt::Nbt root = Nbt::makeList("kronborg list");
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeDouble("kronborg double",
   // 31223); castle::nbt::Nbt root = castle::nbt::Nbt::makeCompound("");
 
@@ -77,13 +76,21 @@ int main(void) {
   // root.add(list);
   std::vector<uint8_t> data;
 
-  root.append(int16_t{2312});
-  root.append(int16_t{-745});
+  // root.append(int16_t{2312});
+  // root.append(int16_t{-745});
 
-  root.compile(data);
-  std::span<const std::uint8_t> ro = data;
+  // root.compile(data);
+  // auto temp = root.get<castle::nbt::NbtTag::FloatTag>();
+  // std::span<const std::uint8_t> ro = data;
 
   size_t offset = 3;
+  auto list = Nbt::makeList("numbers");
+
+  list.append(std::int32_t{10});
+  list.append(std::int32_t{20});
+
+  const auto& elements = std::get<std::vector<Nbt>>(list.value());
+
   // castle::nbt::Nbt w = castle::nbt::FromTagList(ro, offset);
 
   // std::cout << "name is: " << w.name() << "\n ";
