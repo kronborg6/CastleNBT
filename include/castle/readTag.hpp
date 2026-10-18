@@ -12,61 +12,68 @@
 
 namespace castle::nbt {
 
-  // enum class NbtTag : std::uint8_t;
+// enum class NbtTag : std::uint8_t;
 
-  void ToEndTag(std::vector<uint8_t>& data);
+std::string readTagHeader(std::span<const std::uint8_t> data,
+                          std::size_t &offset, NbtTag expted);
 
-  Nbt FromTagByte(std::span<const std::uint8_t> data, std::size_t& offset);
+void ToEndTag(std::vector<uint8_t> &data);
 
-  Nbt FromTagShort(std::span<const std::uint8_t> data, std::size_t& offset);
+Nbt FromTagByte(std::span<const std::uint8_t> data, std::size_t &offset);
 
-  inline Nbt FromTagInt(const std::vector<std::uint8_t>& data, std::size_t& offset);
+Nbt FromTagShort(std::span<const std::uint8_t> data, std::size_t &offset);
 
-  inline Nbt FromTagLong(const std::vector<std::uint8_t>& data, std::size_t& offset);
+Nbt FromTagInt(std::span<const std::uint8_t> &data, std::size_t &offset);
 
-  inline Nbt FromTagFloat(const std::vector<std::uint8_t>& data, std::size_t& offset);
+Nbt FromTagLong(std::span<const std::uint8_t> &data, std::size_t &offset);
 
-  inline Nbt FromTagDouble(const std::vector<std::uint8_t>& data, std::size_t& offset);
+Nbt FromTagFloat(std::span<const std::uint8_t> &data, std::size_t &offset);
 
-  inline Nbt FromTagByteArray(const std::vector<uint8_t>& data, std::size_t& offset);
+Nbt FromTagDouble(std::span<const std::uint8_t> &data, std::size_t &offset);
 
-  inline Nbt FromTagString(const std::vector<std::uint8_t>& data, std::size_t& offset);
+Nbt FromTagByteArray(std::span<const uint8_t> &data, std::size_t &offset);
 
-  inline Nbt FromTagList(const std::vector<uint8_t>& data, std::size_t& offset);
+Nbt FromTagString(std::span<const std::uint8_t> &data, std::size_t &offset);
 
-  inline Nbt FromTagCompound(const std::vector<std::uint8_t>& data, size_t& offset);
+Nbt FromTagList(std::span<const uint8_t> &data, std::size_t &offset);
 
-  inline Nbt FromTagIntArray(const std::vector<uint8_t>& data, std::size_t& offset);
+Nbt FromTagCompound(std::span<const std::uint8_t> &data, size_t &offset);
 
-  inline Nbt FromTagLongArray(const std::vector<uint8_t>& data, std::size_t& offset);
+Nbt FromTagIntArray(std::span<const uint8_t> &data, std::size_t &offset);
 
-  namespace value {
-    std::int8_t FromTagByte(const std::vector<uint8_t>& data, std::size_t& offset);
+Nbt FromTagLongArray(std::span<const uint8_t> &data, std::size_t &offset);
 
-    inline std::int16_t FromTagShort(const std::vector<std::uint8_t>& data, std::size_t& offset);
+namespace value {
+std::int8_t FromTagByte(std::span<const uint8_t> &data, std::size_t &offset);
 
-    inline std::int32_t FromTagInt(const std::vector<std::uint8_t>& data, std::size_t& offset);
+std::int16_t FromTagShort(std::span<const std::uint8_t> &data,
+                          std::size_t &offset);
 
-    inline std::int64_t FromTagLong(const std::vector<std::uint8_t>& data, std::size_t& offset);
+std::int32_t FromTagInt(std::span<const std::uint8_t> &data,
+                        std::size_t &offset);
 
-    inline float FromTagFloat(const std::vector<std::uint8_t>& data, std::size_t& offset);
+std::int64_t FromTagLong(std::span<const std::uint8_t> &data,
+                         std::size_t &offset);
 
-    inline double FromTagDouble(const std::vector<std::uint8_t>& data, std::size_t& offset);
+float FromTagFloat(std::span<const std::uint8_t> &data, std::size_t &offset);
 
-    inline std::vector<std::int8_t> FromTagByteArray(const std::vector<uint8_t>& data,
-                                                     std::size_t& offset);
+double FromTagDouble(std::span<const std::uint8_t> &data, std::size_t &offset);
 
-    inline std::string FromTagString(const std::vector<std::uint8_t>& data, std::size_t& offset);
+std::vector<std::int8_t> FromTagByteArray(const std::vector<uint8_t> &data,
+                                          std::size_t &offset);
 
-    inline std::vector<castle::nbt::NbtValue> FromTagList(const std::vector<uint8_t>& data,
-                                                          std::size_t& offset);
+std::string FromTagString(std::span<const std::uint8_t> &data,
+                          std::size_t &offset);
 
-    inline Nbt FromTagCompound(const std::vector<std::uint8_t>& data, size_t& offset);
+std::vector<castle::nbt::NbtValue> FromTagList(std::span<const uint8_t> &data,
+                                               std::size_t &offset);
 
-    inline std::vector<int32_t> FromTagIntArray(const std::vector<uint8_t>& data,
-                                                std::size_t& offset);
+Nbt FromTagCompound(std::span<const std::uint8_t> &data, size_t &offset);
 
-    inline std::vector<int64_t> FromTagLongArray(const std::vector<uint8_t>& data,
-                                                 std::size_t& offset);
-  } // namespace value
+std::vector<int32_t> FromTagIntArray(std::span<const uint8_t> &data,
+                                     std::size_t &offset);
+
+std::vector<int64_t> FromTagLongArray(std::span<const uint8_t> &data,
+                                      std::size_t &offset);
+} // namespace value
 } // namespace castle::nbt
