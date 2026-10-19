@@ -1,9 +1,8 @@
-#include "castle/writeTag.hpp"
+#include "castle/lowlevel/readTag.hpp"
 #include "endian.hpp"
 #include <algorithm>
 #include <bit>
 #include <castle/nbt.hpp>
-#include <castle/readTag.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>

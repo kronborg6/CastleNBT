@@ -1,7 +1,6 @@
 #pragma once
-
-#include "castle/writeTag.hpp"
-#include "nbt.hpp"
+#include "castle/lowlevel/common.hpp"
+#include "castle/nbt.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <span>
@@ -12,8 +11,6 @@
 #include <vector>
 
 namespace castle::nbt {
-
-  // enum class NbtTag : std::uint8_t;
 
   std::string readTagHeader(std::span<const std::uint8_t> data, std::size_t& offset, NbtTag expted);
 

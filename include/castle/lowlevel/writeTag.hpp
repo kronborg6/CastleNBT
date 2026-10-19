@@ -1,4 +1,7 @@
 #pragma once
+
+#include "castle/lowlevel/common.hpp"
+#include "castle/nbt.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -10,10 +13,12 @@ namespace castle::nbt {
 
   enum class NbtTag : std::uint8_t;
 
-  enum class TagContext {
-    Named,
-    ListElement,
-  };
+  void
+  writeNbt(const Nbt& node, std::vector<uint8_t>& data, TagContext context = TagContext::Named);
+
+  template <NbtTag Tag>
+  constexpr void
+  insertNameAndTag(std::string_view name, std::vector<uint8_t>& data, TagContext context);
 
   void ToEndTag(std::vector<uint8_t>& data);
 

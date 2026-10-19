@@ -1,5 +1,5 @@
+#include <castle/lowlevel/readTag.hpp>
 #include <castle/nbt.hpp>
-#include <castle/readTag.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <iomanip>

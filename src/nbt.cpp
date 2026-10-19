@@ -1,4 +1,6 @@
 #include "castle/nbt.hpp"
+#include "castle/lowlevel/readTag.hpp"
+#include "castle/lowlevel/writeTag.hpp"
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
@@ -8,108 +10,133 @@
 
 namespace castle::nbt {
 
-void writeNbtDocument(const Nbt &node, std::vector<uint8_t> &data) {
-  writeNbt(Nbt::makeCompound("", std::vector<Nbt>{node}), data);
-}
-void writeNbt(const Nbt &node, std::vector<uint8_t> &data, TagContext context) {
-  switch (node.tag()) {
-  case NbtTag::EndTag:
-    ToEndTag(data);
-    break;
-  case NbtTag::ByteTag:
-    ToTagByte(node.name(), std::get<int8_t>(node.value()), data, context);
-    break;
-  case NbtTag::ShortTag:
-    ToTagShort(node.name(), std::get<int16_t>(node.value()), data, context);
-    break;
-  case NbtTag::IntTag:
-    ToTagInt(node.name(), std::get<int32_t>(node.value()), data, context);
-    break;
-  case NbtTag::LongTag:
-    ToTagLong(node.name(), std::get<int64_t>(node.value()), data, context);
-    break;
-  case NbtTag::FloatTag:
-    ToTagFloat(node.name(), std::get<float>(node.value()), data, context);
-    break;
-  case NbtTag::DoubleTag:
-    ToTagDouble(node.name(), std::get<double>(node.value()), data, context);
-    break;
-  case NbtTag::ByteArrayTag: {
-    const std::vector<int8_t> &values =
-        std::get<std::vector<int8_t>>(node.value());
-    ToTagByteArray(node.name(), values, data, context);
-    break;
+  void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data) {
+    writeNbt(Nbt::makeCompound("", std::vector<Nbt>{node}), data);
   }
-  case NbtTag::StringTag: {
-    const std::string &value = std::get<std::string>(node.value());
 
-    ToTagString(node.name(), value, data, context);
-
-    break;
-  }
-  case NbtTag::ListTag: {
-    const std::vector<Nbt> &values = std::get<std::vector<Nbt>>(node.value());
-
-    bool allSameTag =
-        values.empty() ||
-        std::all_of(values.begin() + 1, values.end(), [&](const Nbt &u) {
-          return u.tag() == values.front().tag();
-        });
-
-    if (!allSameTag) {
-      throw std::runtime_error("not all the same tag");
+  Nbt readNbt(std::span<const uint8_t> data, std::size_t& offset) {
+    if (data.size() < offset) {
+      throw std::runtime_error("unexpected end of data");
     }
 
-    NbtTag valueType = !values.empty() ? values.front().tag() : NbtTag::EndTag;
+    NbtTag tag = static_cast<NbtTag>(data[offset]);
 
-    ToTagList(node.name(), valueType, values.size(), data, context);
-
-    for (const Nbt &value : values) {
-
-      writeNbt(value, data, TagContext::ListElement);
+    if (tag != NbtTag::CompoundTag) {
+      throw std::runtime_error("frist Tag needs to be a CompoundTag");
     }
 
-    break;
+    return FromTagCompound(data, offset);
   }
-  case NbtTag::CompoundTag: {
-    ToTagCompound(node.name(), data, context);
 
-    const std::vector<Nbt> &values = std::get<std::vector<Nbt>>(node.value());
-
-    for (const Nbt &var : values) {
-      writeNbt(var, data);
+  void writeNbt(const Nbt& node, std::vector<uint8_t>& data, TagContext context) {
+    switch (node.tag()) {
+    case NbtTag::EndTag:
+      ToEndTag(data);
+      break;
+    case NbtTag::ByteTag:
+      ToTagByte(node.name(), std::get<int8_t>(node.value()), data, context);
+      break;
+    case NbtTag::ShortTag:
+      ToTagShort(node.name(), std::get<int16_t>(node.value()), data, context);
+      break;
+    case NbtTag::IntTag:
+      ToTagInt(node.name(), std::get<int32_t>(node.value()), data, context);
+      break;
+    case NbtTag::LongTag:
+      ToTagLong(node.name(), std::get<int64_t>(node.value()), data, context);
+      break;
+    case NbtTag::FloatTag:
+      ToTagFloat(node.name(), std::get<float>(node.value()), data, context);
+      break;
+    case NbtTag::DoubleTag:
+      ToTagDouble(node.name(), std::get<double>(node.value()), data, context);
+      break;
+    case NbtTag::ByteArrayTag: {
+      const std::vector<int8_t>& values = std::get<std::vector<int8_t>>(node.value());
+      ToTagByteArray(node.name(), values, data, context);
+      break;
     }
-    ToEndTag(data);
+    case NbtTag::StringTag: {
+      const std::string& value = std::get<std::string>(node.value());
 
-    break;
+      ToTagString(node.name(), value, data, context);
+
+      break;
+    }
+    case NbtTag::ListTag: {
+      const std::vector<Nbt>& values = std::get<std::vector<Nbt>>(node.value());
+
+      bool allSameTag =
+          values.empty() || std::all_of(values.begin() + 1, values.end(), [&](const Nbt& u) {
+            return u.tag() == values.front().tag();
+          });
+
+      if (!allSameTag) {
+        throw std::runtime_error("not all the same tag");
+      }
+
+      NbtTag valueType = !values.empty() ? values.front().tag() : NbtTag::EndTag;
+
+      ToTagList(node.name(), valueType, values.size(), data, context);
+
+      for (const Nbt& value : values) {
+
+        writeNbt(value, data, TagContext::ListElement);
+      }
+
+      break;
+    }
+    case NbtTag::CompoundTag: {
+      ToTagCompound(node.name(), data, context);
+
+      const std::vector<Nbt>& values = std::get<std::vector<Nbt>>(node.value());
+
+      for (const Nbt& var : values) {
+        writeNbt(var, data);
+      }
+      ToEndTag(data);
+
+      break;
+    }
+    case NbtTag::IntArrayTag: {
+
+      const std::vector<int32_t>& values = std::get<std::vector<int32_t>>(node.value());
+      ToTagIntArray(node.name(), values, data, context);
+      break;
+    }
+    case NbtTag::LongArrayTag: {
+
+      const std::vector<int64_t>& values = std::get<std::vector<int64_t>>(node.value());
+      ToTagLongArray(node.name(), values, data, context);
+      break;
+    }
+    default:
+      throw std::runtime_error("not a vailed tag type");
+      break;
+    }
   }
-  case NbtTag::IntArrayTag: {
 
-    const std::vector<int32_t> &values =
-        std::get<std::vector<int32_t>>(node.value());
-    ToTagIntArray(node.name(), values, data, context);
-    break;
+  castle::nbt::Nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value)
+      : _name(name), _tag(tag), _value(value) {
+    _init = true;
+  };
+
+  void castle::nbt::Nbt::compile(std::vector<std::uint8_t>& output) {
+    if (_tag != NbtTag::CompoundTag) {
+      writeNbtDocument(*this, output);
+    } else {
+      writeNbt(*this, output);
+    }
   }
-  case NbtTag::LongArrayTag: {
 
-    const std::vector<int64_t> &values =
-        std::get<std::vector<int64_t>>(node.value());
-    ToTagLongArray(node.name(), values, data, context);
-    break;
+  std::vector<std::uint8_t> castle::nbt::Nbt::compile() {
+    std::vector<std::uint8_t> output;
+    compile(output);
+    return output;
   }
-  default:
-    throw std::runtime_error("not a vailed tag type");
-    break;
-  }
-}
 
-castle::nbt::Nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value)
-    : _name(name), _tag(tag), _value(value) {
-  _init = true;
-};
-
-// castle::nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value) {
-// }
+  // castle::nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value) {
+  // }
 
 } // namespace castle::nbt
   //
