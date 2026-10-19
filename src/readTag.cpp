@@ -1,12 +1,15 @@
 #include "endian.hpp"
+#include <algorithm>
 #include <bit>
 #include <castle/nbt.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <format>
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <unistd.h>
 #include <utility>
 #include <vector>
 
@@ -133,31 +136,86 @@ namespace castle::nbt {
     return Nbt::makeList(name);
   }
 
-  Nbt FromTagCompound(std::span<const std::uint8_t> data, size_t& offset) {
-
-    std::string name = readTagHeader(data, offset, NbtTag::CompoundTag);
-  }
-
   Nbt FromTagIntArray(std::span<const uint8_t> data, std::size_t& offset) {
     std::string name = readTagHeader(data, offset, NbtTag::IntArrayTag);
 
     const size_t size = static_cast<size_t>(endian::readBigEndian<uint32_t>(data, offset));
 
-    std::vector<int32_t> values(data.begin() + offset, data.begin() + size + offset);
-    offset += size;
+    std::vector<int32_t> values;
+    values.reserve(size);
+
+    for (uint32_t i = 0; i < size; i++) {
+      values.push_back(static_cast<int32_t>(endian::readBigEndian<uint32_t>(data, offset)));
+    }
 
     return Nbt::makeIntArray(std::move(name), std::move(values));
   }
 
-  Nbt FromTagLongArray(std::span<const uint8_t>& data, std::size_t& offset) {
+  Nbt FromTagLongArray(std::span<const uint8_t> data, std::size_t& offset) {
     std::string name = readTagHeader(data, offset, NbtTag::LongArrayTag);
 
     const size_t size = static_cast<size_t>(endian::readBigEndian<uint32_t>(data, offset));
 
-    std::vector<int64_t> values(data.begin() + offset, data.begin() + size + offset);
-    offset += size;
+    std::vector<int64_t> values;
+    values.reserve(size);
+
+    for (uint32_t i = 0; i < size; i++) {
+      values.push_back(static_cast<int64_t>(endian::readBigEndian<uint64_t>(data, offset)));
+    }
 
     return Nbt::makeLongArray(std::move(name), std::move(values));
+  }
+  Nbt FromTagCompound(std::span<const std::uint8_t> data, size_t& offset) {
+    std::string name = readTagHeader(data, offset, NbtTag::CompoundTag);
+
+    std::vector<Nbt> values;
+    while (offset < data.size()) {
+      NbtTag nextTag = static_cast<NbtTag>(data[offset]);
+      switch (nextTag) {
+      case NbtTag::EndTag:
+        return Nbt::makeCompound(std::move(name), std::move(values));
+      case NbtTag::ByteTag:
+        values.push_back(FromTagByte(data, offset));
+        break;
+      case NbtTag::ShortTag:
+        values.push_back(FromTagShort(data, offset));
+        break;
+      case NbtTag::IntTag:
+        values.push_back(FromTagInt(data, offset));
+        break;
+      case NbtTag::LongTag:
+        values.push_back(FromTagLong(data, offset));
+        break;
+      case NbtTag::FloatTag:
+        values.push_back(FromTagFloat(data, offset));
+        break;
+      case NbtTag::DoubleTag:
+        values.push_back(FromTagDouble(data, offset));
+        break;
+      case NbtTag::ByteArrayTag:
+        values.push_back(FromTagDouble(data, offset));
+        break;
+      case NbtTag::StringTag:
+        values.push_back(FromTagString(data, offset));
+        break;
+      case NbtTag::ListTag:
+        values.push_back(FromTagList(data, offset));
+        break;
+      case NbtTag::CompoundTag:
+        values.push_back(FromTagCompound(data, offset));
+        break;
+      case NbtTag::IntArrayTag:
+        values.push_back(FromTagIntArray(data, offset));
+        break;
+      case NbtTag::LongArrayTag:
+        values.push_back(FromTagLongArray(data, offset));
+        break;
+      default:
+        throw std::runtime_error(std::format("Undefined NBT tag: {}", std::to_underlying(nextTag)));
+        break;
+      }
+    }
+    throw std::runtime_error("missing end Tag");
   }
 
   namespace value {
@@ -203,7 +261,7 @@ namespace castle::nbt {
       return FromTagCompound(data, offset);
     }
 
-    std::vector<int32_t> FromTagIntArray(std::span<const uint8_t>& data, std::size_t& offset) {
+    std::vector<int32_t> FromTagIntArray(std::span<const uint8_t> data, std::size_t& offset) {
 
       return std::get<std::vector<std::int32_t>>(nbt::FromTagByte(data, offset).value());
     }

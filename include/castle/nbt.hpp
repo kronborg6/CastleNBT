@@ -65,7 +65,7 @@ namespace castle::nbt {
       using type = std::vector<Nbt>;
   };
   template <> struct NbtValueOf<NbtTag::CompoundTag> {
-      using type = std::vector<int32_t>;
+      using type = std::vector<Nbt>;
   };
   template <> struct NbtValueOf<NbtTag::IntArrayTag> {
       using type = std::vector<int64_t>;
