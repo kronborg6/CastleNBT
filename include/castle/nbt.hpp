@@ -87,10 +87,6 @@ namespace castle::nbt {
   Nbt makeNbt(std::string name, const NbtValue& value);
   Nbt makeNbt(const NbtValue& value);
 
-  // void
-  // writeNbt(const Nbt& node, std::vector<uint8_t>& data, TagContext context = TagContext::Named);
-  // Nbt readNbt(std::span<const uint8_t> data, std::size_t& offset);
-
   void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data);
   Nbt readNbtDocument(std::span<const uint8_t> data, std::size_t& offset);
   class Nbt {
@@ -205,13 +201,6 @@ namespace castle::nbt {
        * @param output The vector to append the serialized bytes to.
        */
       void compile(std::vector<std::uint8_t>& output);
-      // void compile(std::vector<std::uint8_t>& output) {
-      //   if (_tag != NbtTag::CompoundTag) {
-      //     writeNbtDocument(*this, output);
-      //   } else {
-      //     writeNbt(*this, output);
-      //   }
-      // }
 
       /**
        * @brief Compile the NBT tag into binary format.
@@ -219,11 +208,6 @@ namespace castle::nbt {
        * @return std::vector<std::uint8_t> The serialized bytes.
        */
       std::vector<std::uint8_t> compile();
-      // {
-      //   std::vector<std::uint8_t> output;
-      //   compile(output);
-      //   return output;
-      // }
 
       NbtTag tag() const {
         return _tag;
@@ -254,9 +238,5 @@ namespace castle::nbt {
   };
 
   constexpr std::uint8_t tag(NbtTag value) noexcept;
-
-  // template <NbtTag Tag>
-  // constexpr void
-  // insertNameAndTag(std::string_view name, std::vector<uint8_t>& data, TagContext context);
 
 } // namespace castle::nbt

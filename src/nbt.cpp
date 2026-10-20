@@ -14,20 +14,6 @@ namespace castle::nbt {
     writeNbt(Nbt::makeCompound("", std::vector<Nbt>{node}), data);
   }
 
-  Nbt readNbt(std::span<const uint8_t> data, std::size_t& offset) {
-    if (data.size() < offset) {
-      throw std::runtime_error("unexpected end of data");
-    }
-
-    NbtTag tag = static_cast<NbtTag>(data[offset]);
-
-    if (tag != NbtTag::CompoundTag) {
-      throw std::runtime_error("frist Tag needs to be a CompoundTag");
-    }
-
-    return FromTagCompound(data, offset);
-  }
-
   void writeNbt(const Nbt& node, std::vector<uint8_t>& data, TagContext context) {
     switch (node.tag()) {
     case NbtTag::EndTag:
