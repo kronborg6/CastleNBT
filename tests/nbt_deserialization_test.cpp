@@ -428,3 +428,28 @@ TEST(NbtDeserialization, CorruptedInputNeverCrashes) {
     } // throwing is fine, crashing or other exceptions are not
   }
 }
+TEST(NbtDeserialization, CorruptedInputNeverCrashes2) {
+  const auto& full = testdata::allTagTypes();
+
+  // FUZZ_SEED=123 reproduces a failure; "random" picks a fresh seed every run.
+  std::uint32_t seed = 12345;
+  if (const char* env = std::getenv("FUZZ_SEED")) {
+    seed = std::string(env) == "random" ? std::random_device{}()
+                                        : static_cast<std::uint32_t>(std::stoul(env));
+  }
+  SCOPED_TRACE("FUZZ_SEED=" + std::to_string(seed)); // shown with any failure
+
+  std::mt19937 rng(seed);
+  for (int i = 0; i < 20000; ++i) {
+    auto copy = full;
+    const std::size_t pos = rng() % copy.size();
+    copy[pos] = static_cast<std::uint8_t>(rng());
+    SCOPED_TRACE("iteration " + std::to_string(i) + ", byte " + std::to_string(pos));
+
+    std::size_t offset = 0;
+    try {
+      castle::nbt::FromTagCompound(copy, offset);
+    } catch (const std::runtime_error&) {
+    }
+  }
+}
