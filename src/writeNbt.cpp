@@ -1,3 +1,4 @@
+#include "castle/lowlevel/common.hpp"
 #include "castle/lowlevel/writeTag.hpp"
 #include "endian.hpp"
 #include <castle/nbt.hpp>
@@ -38,7 +39,8 @@ namespace castle::nbt {
   template <NbtTag Tag>
   constexpr void
   insertNameAndTag(std::string_view name, std::vector<uint8_t>& data, TagContext context) {
-    if (context == TagContext::ListElement || Tag == NbtTag::EndTag)
+    if ((context == TagContext::ListElement || context == TagContext::NamelessRoot) ||
+        Tag == NbtTag::EndTag)
       return;
 
     static_assert(Tag != NbtTag::EndTag, "EndTag does not have a name");

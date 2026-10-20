@@ -1,17 +1,11 @@
+#include "castle/lowlevel/common.hpp"
 #include "castle/lowlevel/readTag.hpp"
 #include "castle/nbt.hpp"
 
 namespace castle::nbt {
 
-  struct ReadOptions {
-      // Endian endian = Endian::Big; // Bedrock files use little endian
-      bool namelessRoot = false; // network format, no root name field
-      bool allowTrailingBytes = false;
-      std::size_t maxDepth = 512;
-  };
-
   Nbt readNbt(std::span<const uint8_t> data, std::size_t& offset, ReadOptions options) {
-    if (data.size() < offset) {
+    if (data.size() <= offset) {
       throw std::runtime_error("unexpected end of data");
     }
 
@@ -21,11 +15,8 @@ namespace castle::nbt {
       throw std::runtime_error("frist Tag needs to be a CompoundTag");
     }
 
-    std::string name = readTagHeader(data, offset, NbtTag::CompoundTag);
-
-    if (options.namelessRoot && !name.empty()) {
-
-      throw std::runtime_error("root CompoundTag must me nameless");
+    if (options.namelessRoot) {
+      return FromTagCompound(data, offset, TagContext::NamelessRoot);
     }
 
     return FromTagCompound(data, offset);

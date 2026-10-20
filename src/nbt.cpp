@@ -1,17 +1,34 @@
 #include "castle/nbt.hpp"
+#include "castle/lowlevel/common.hpp"
 #include "castle/lowlevel/readTag.hpp"
 #include "castle/lowlevel/writeTag.hpp"
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace castle::nbt {
 
-  void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data) {
-    writeNbt(Nbt::makeCompound("", std::vector<Nbt>{node}), data);
+  constexpr std::string_view kDefaultWrapKey = "value";
+
+  void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data, WriteOptions options) {
+
+    if (node.tag() == NbtTag::EndTag) {
+      throw std::runtime_error("root tag can't be a endTag");
+    }
+    TagContext ctx = options.namelessRoot ? TagContext::NamelessRoot : TagContext::Named;
+    if (node.tag() != NbtTag::CompoundTag && options.wrapNonCompoundRoot) {
+
+      writeNbt(Nbt::makeCompound("",
+                                 std::vector<Nbt>{node.name().empty()
+                                                      ? node.renamed(std::string(kDefaultWrapKey))
+                                                      : node}),
+               data,
+               ctx);
+    } else {
+      writeNbt(node, data, ctx);
+    }
   }
 
   void writeNbt(const Nbt& node, std::vector<uint8_t>& data, TagContext context) {
@@ -121,8 +138,4 @@ namespace castle::nbt {
     return output;
   }
 
-  // castle::nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value) {
-  // }
-
 } // namespace castle::nbt
-  //

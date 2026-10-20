@@ -34,6 +34,17 @@ namespace castle::nbt {
     IntArrayTag = 0x0B,
     LongArrayTag = 0x0C,
   };
+
+  struct WriteOptions {
+      bool namelessRoot = false;       // network format, no root name field
+      bool wrapNonCompoundRoot = true; // set to false to allow e.g. a bare StringTag root
+  };
+  struct ReadOptions {
+      // Endian endian = Endian::Big; // Bedrock files use little endian
+      bool namelessRoot = false; // network format, no root name field
+      bool allowTrailingBytes = false;
+      std::size_t maxDepth = 512;
+  };
   class Nbt;
 
   template <NbtTag Tag> struct NbtValueOf;
@@ -87,7 +98,7 @@ namespace castle::nbt {
   Nbt makeNbt(std::string name, const NbtValue& value);
   Nbt makeNbt(const NbtValue& value);
 
-  void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data);
+  void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data, WriteOptions options = {});
   Nbt readNbtDocument(std::span<const uint8_t> data, std::size_t& offset);
   class Nbt {
     public:
@@ -226,6 +237,11 @@ namespace castle::nbt {
 
       const NbtValue& value() const {
         return _value;
+      }
+      Nbt renamed(std::string newName) const {
+        Nbt copy = *this;                // copies the value (deep copy for compounds/lists)
+        copy._name = std::move(newName); // use whatever your private name field is called
+        return copy;
       }
 
     private:

@@ -1,4 +1,5 @@
 #include "castle/lowlevel/readTag.hpp"
+#include "castle/lowlevel/common.hpp"
 #include "endian.hpp"
 #include <algorithm>
 #include <bit>
@@ -18,15 +19,27 @@
 #include <vector>
 
 namespace castle::nbt {
-
+  inline void
+  requireBytes(std::span<const std::uint8_t> data, std::size_t offset, std::size_t count) {
+    if (offset > data.size() || data.size() - offset < count) {
+      throw std::runtime_error("unexpected end of data");
+    }
+  }
   // enum class NbtTag : std::uint8_t;
 
   std::string readTagHeader(std::span<const std::uint8_t> data,
                             std::size_t& offset,
                             NbtTag exepted,
-                            nbt::TagContext context = TagContext::Named) {
+                            nbt::TagContext context) {
     if (offset >= data.size()) {
       throw std::runtime_error("unexpected end of data");
+    }
+
+    if (context == TagContext::NamelessRoot) {
+      if (static_cast<NbtTag>(data[offset++]) != exepted) {
+        throw std::runtime_error("unexpected tag type");
+      }
+      return ""; // no name field follows
     }
 
     if (context == TagContext::ListElement) {
@@ -54,6 +67,9 @@ namespace castle::nbt {
                   nbt::TagContext context) {
     std::string name = readTagHeader(data, offset, NbtTag::ByteTag, context);
 
+    if (offset >= data.size()) {
+      throw std::runtime_error("unexpected end of data");
+    }
     std::int8_t value = static_cast<std::int8_t>(data[offset++]);
 
     return Nbt::makeByte(std::move(name), value);
@@ -118,6 +134,8 @@ namespace castle::nbt {
 
     const size_t size = static_cast<size_t>(endian::readBigEndian<uint32_t>(data, offset));
 
+    requireBytes(data, offset, size);
+
     std::vector<int8_t> values(data.begin() + offset, data.begin() + size + offset);
     offset += size;
 
@@ -131,6 +149,7 @@ namespace castle::nbt {
 
     uint16_t valueLengh = endian::readBigEndian<uint16_t>(data, offset);
 
+    requireBytes(data, offset, valueLengh);
     std::string value(data.begin() + offset, data.begin() + valueLengh + offset);
     offset += valueLengh;
 
@@ -140,6 +159,9 @@ namespace castle::nbt {
   Nbt FromTagList(std::span<const uint8_t> data, std::size_t& offset, nbt::TagContext context) {
     std::string name = readTagHeader(data, offset, NbtTag::ListTag, context);
 
+    if (offset >= data.size()) {
+      throw std::runtime_error("unexpected end of data");
+    }
     NbtTag listType = static_cast<NbtTag>(data[offset++]);
     NbtTag lastType = listType;
 
@@ -161,54 +183,53 @@ namespace castle::nbt {
         if (listLength > 0) {
           throw std::runtime_error("list can't have Length when type is endTag");
         }
-        lastType = listType;
         return Nbt::makeList(std::move(name), std::move(values));
       case NbtTag::ByteTag:
-        lastType = listType;
+        lastType = NbtTag::ByteTag;
         values.push_back(FromTagByte(data, offset, TagContext::ListElement));
         break;
       case NbtTag::ShortTag:
-        lastType = listType;
+        lastType = NbtTag::ShortTag;
         values.push_back(FromTagShort(data, offset, TagContext::ListElement));
         break;
       case NbtTag::IntTag:
-        lastType = listType;
+        lastType = NbtTag::IntTag;
         values.push_back(FromTagInt(data, offset, TagContext::ListElement));
         break;
       case NbtTag::LongTag:
-        lastType = listType;
+        lastType = NbtTag::LongTag;
         values.push_back(FromTagLong(data, offset, TagContext::ListElement));
         break;
       case NbtTag::FloatTag:
-        lastType = listType;
+        lastType = NbtTag::FloatTag;
         values.push_back(FromTagFloat(data, offset, TagContext::ListElement));
         break;
       case NbtTag::DoubleTag:
-        lastType = listType;
+        lastType = NbtTag::DoubleTag;
         values.push_back(FromTagDouble(data, offset, TagContext::ListElement));
         break;
       case NbtTag::ByteArrayTag:
-        lastType = listType;
+        lastType = NbtTag::ByteArrayTag;
         values.push_back(FromTagByteArray(data, offset, TagContext::ListElement));
         break;
       case NbtTag::StringTag:
-        lastType = listType;
+        lastType = NbtTag::StringTag;
         values.push_back(FromTagString(data, offset, TagContext::ListElement));
         break;
       case NbtTag::ListTag:
-        lastType = listType;
+        lastType = NbtTag::ListTag;
         values.push_back(FromTagList(data, offset, TagContext::ListElement));
         break;
       case NbtTag::CompoundTag:
-        lastType = listType;
+        lastType = NbtTag::CompoundTag;
         values.push_back(FromTagCompound(data, offset, TagContext::ListElement));
         break;
       case NbtTag::IntArrayTag:
-        lastType = listType;
+        lastType = NbtTag::IntArrayTag;
         values.push_back(FromTagIntArray(data, offset, TagContext::ListElement));
         break;
       case NbtTag::LongArrayTag:
-        lastType = listType;
+        lastType = NbtTag::LongArrayTag;
         values.push_back(FromTagLongArray(data, offset, TagContext::ListElement));
         break;
       default:
@@ -259,6 +280,7 @@ namespace castle::nbt {
       NbtTag nextTag = static_cast<NbtTag>(data[offset]);
       switch (nextTag) {
       case NbtTag::EndTag:
+        offset++;
         return Nbt::makeCompound(std::move(name), std::move(values));
       case NbtTag::ByteTag:
         values.push_back(FromTagByte(data, offset));

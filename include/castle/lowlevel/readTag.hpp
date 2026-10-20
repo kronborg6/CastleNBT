@@ -12,7 +12,10 @@
 
 namespace castle::nbt {
 
-  std::string readTagHeader(std::span<const std::uint8_t> data, std::size_t& offset, NbtTag expted);
+  std::string readTagHeader(std::span<const std::uint8_t> data,
+                            std::size_t& offset,
+                            NbtTag exepted,
+                            nbt::TagContext context = TagContext::Named);
 
   void ToEndTag(std::vector<uint8_t>& data);
 
