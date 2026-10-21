@@ -1,38 +1,38 @@
 # CastleNBT
 
-A C++23 library for creating and serializing Minecraft NBT
-(Named Binary Tag) data.
+A C++23 library for creating, reading, and writing Minecraft NBT (Named Binary Tag) data.
 
-CastleNBT is primarily a learning project created while developing
-**CastleCraft**, my own Minecraft server implementation.
+CastleNBT provides a high-level API for working with NBT structures and a low-level API for reading and writing individual NBT tags.
 
-> [!NOTE]
-> **Current version: `0.1.0`**
+The library was created as part of [CastleCraft](https://github.com/kronborg6), a Minecraft server project written from scratch in C++.
+
+> [!WARNING]
+> **Development branch — Upcoming version 0.2.0**
 >
-> CastleNBT is in early development. Version `0.1.0` focuses on creating
-> NBT structures and serializing them to the binary NBT format.
+> CastleNBT is still in early development. The `dev` branch contains significant breaking changes compared to version `0.1.0`.
 >
-> Reading/parsing NBT is planned for a future release.
+> The new reading API and some low-level functionality are still under development. APIs may change before the 0.2.0 release.
 
 ## Contents
 
 - [Features](#features)
-- [Supported Tags](#supported-tags)
+- [Supported NBT Tags](#supported-nbt-tags)
 - [Requirements](#requirements)
 - [Installation](#installation)
-  - [CMake FetchContent](#cmake-fetchcontent)
-  - [Git Submodule](#git-submodule)
 - [Quick Start](#quick-start)
 - [Usage](#usage)
-  - [Creating a Compound](#creating-a-compound)
-  - [Nested Compounds](#nested-compounds)
+  - [Creating NBT Tags](#creating-nbt-tags)
+  - [Compounds](#compounds)
   - [Lists](#lists)
   - [Arrays](#arrays)
-  - [Serializing NBT](#serializing-nbt)
-- [API Overview](#api-overview)
-- [Building CastleNBT](#building-castlenbt)
-- [Running Tests](#running-tests)
-- [Version 0.1.0](#version-010)
+  - [Accessing NBT Values](#accessing-nbt-values)
+  - [Writing NBT](#writing-nbt)
+  - [Reading NBT](#reading-nbt)
+  - [Reading and Writing Options](#reading-and-writing-options)
+- [Low-Level API](#low-level-api)
+- [Breaking Changes in 0.2.0](#breaking-changes-in-020)
+- [Building](#building)
+- [Testing](#testing)
 - [Roadmap](#roadmap)
 - [Project Structure](#project-structure)
 - [Motivation](#motivation)
@@ -40,52 +40,64 @@ CastleNBT is primarily a learning project created while developing
 
 ## Features
 
-- C++23
-- All standard NBT tag types
-- Nested compound tags
-- Homogeneous NBT lists
-- Byte, Int and Long arrays
+- Modern C++23 implementation
+- Support for all standard NBT tag types
+- High-level `Nbt` object representation
 - Binary NBT serialization
-- Big-endian numeric encoding
-- Serialization to `std::vector<std::uint8_t>`
-- CMake support
-- CMake `FetchContent` support
-- GoogleTest test suite
+- Binary NBT parsing (under development)
+- Nested compounds and lists
+- Homogeneous list validation
+- Byte, Int, and Long arrays
+- Big-endian binary encoding
+- Support for `std::vector<std::uint8_t>` and `std::span`
+- Stream-based reading interface
+- Configurable reading and writing interfaces
+- Low-level tag reading and writing functions
+- CMake integration with `FetchContent`
+- GoogleTest-based test suite
 
-## Supported Tags
+## Supported NBT Tags
 
-| NBT Tag | Support |
-| --- | --- |
-| `TAG_End` | Internal |
-| `TAG_Byte` | ✅ |
-| `TAG_Short` | ✅ |
-| `TAG_Int` | ✅ |
-| `TAG_Long` | ✅ |
-| `TAG_Float` | ✅ |
-| `TAG_Double` | ✅ |
-| `TAG_Byte_Array` | ✅ |
-| `TAG_String` | ✅ |
-| `TAG_List` | ✅ |
-| `TAG_Compound` | ✅ |
-| `TAG_Int_Array` | ✅ |
-| `TAG_Long_Array` | ✅ |
+CastleNBT supports the 12 standard NBT value types.
 
-> In version `0.1.0`, support refers to creating and serializing these
-> tags. Binary NBT parsing is not implemented yet.
+| NBT Tag | C++ Type |
+|---|---|
+| `TAG_End` | Internal marker |
+| `TAG_Byte` | `std::int8_t` |
+| `TAG_Short` | `std::int16_t` |
+| `TAG_Int` | `std::int32_t` |
+| `TAG_Long` | `std::int64_t` |
+| `TAG_Float` | `float` |
+| `TAG_Double` | `double` |
+| `TAG_Byte_Array` | `std::vector<std::int8_t>` |
+| `TAG_String` | `std::string` |
+| `TAG_List` | `std::vector<Nbt>` |
+| `TAG_Compound` | `std::vector<Nbt>` |
+| `TAG_Int_Array` | `std::vector<std::int32_t>` |
+| `TAG_Long_Array` | `std::vector<std::int64_t>` |
+
+`TAG_End` is used internally to terminate compound tags and is not intended to be created as a normal data value.
+
+Both lists and compounds use `std::vector<Nbt>` internally. Their NBT tag identifiers distinguish their meaning and binary representation.
+
+> [!NOTE]
+> Writing support is implemented for the standard tag types. Reading support is being developed and tested for the upcoming 0.2.0 release.
 
 ## Requirements
 
-- C++23 compatible compiler
+- A C++23-compatible compiler
 - CMake 3.24 or newer
+- A standard library with the required C++23 features
 
-GoogleTest is required only when building the CastleNBT test suite.
+GoogleTest is only required when building the test suite.
 
 ## Installation
 
 ### CMake FetchContent
 
-The recommended way to use CastleNBT in another CMake project is with
-`FetchContent`.
+CastleNBT can be included directly in another CMake project using `FetchContent`.
+
+To use the development branch:
 
 ```cmake
 include(FetchContent)
@@ -93,7 +105,7 @@ include(FetchContent)
 FetchContent_Declare(
     castleNBT
     GIT_REPOSITORY https://github.com/kronborg6/CastleNBT.git
-    GIT_TAG v0.1.0
+    GIT_TAG dev
 )
 
 FetchContent_MakeAvailable(castleNBT)
@@ -103,28 +115,33 @@ target_link_libraries(your_target
 )
 ```
 
-CastleNBT can then be included with:
+Include the library headers:
 
 ```cpp
 #include <castle/nbt.hpp>
+#include <castle/reader.hpp>
+#include <castle/writer.hpp>
 ```
 
-Using a version tag such as `v0.1.0` instead of the `main` branch is
-recommended because it keeps your builds reproducible.
+> [!IMPORTANT]
+> The `dev` branch is not a stable release. For reproducible builds, use a release tag or commit hash.
+>
+> After 0.2.0 is released, replace `GIT_TAG dev` with the corresponding release tag.
 
 ### Git Submodule
 
 CastleNBT can also be included as a Git submodule.
 
 ```bash
-git submodule add https://github.com/kronborg6/CastleNBT.git external/castleNBT
+git submodule add -b dev https://github.com/kronborg6/CastleNBT.git external/CastleNBT
+
 git submodule update --init --recursive
 ```
 
-Then add CastleNBT to your `CMakeLists.txt`:
+Add the library to your project:
 
 ```cmake
-add_subdirectory(external/castleNBT)
+add_subdirectory(external/CastleNBT)
 
 target_link_libraries(your_target
     PRIVATE castleNBT
@@ -133,10 +150,17 @@ target_link_libraries(your_target
 
 ## Quick Start
 
+Create an NBT compound containing player information and serialize it.
+
 ```cpp
 #include <castle/nbt.hpp>
+#include <castle/writer.hpp>
+
+#include <cstdint>
+#include <vector>
 
 using castle::nbt::Nbt;
+using castle::nbt::NbtWriter;
 
 int main() {
     auto root = Nbt::makeCompound("");
@@ -145,56 +169,58 @@ int main() {
     root.add(Nbt::makeInt("health", 20));
     root.add(Nbt::makeFloat("speed", 0.1f));
 
-    auto bytes = root.compile();
+    std::vector<std::uint8_t> data =
+        NbtWriter::writer(root);
+
+    return 0;
 }
 ```
 
-`compile()` serializes the NBT structure and returns the resulting
-binary data as a `std::vector<std::uint8_t>`.
+`NbtWriter::writer()` serializes the NBT structure into binary data.
+
+The example produces a root compound containing three named tags.
 
 ## Usage
 
-### Creating a Compound
+### Creating NBT Tags
 
-Create a compound with `Nbt::makeCompound()` and add named tags using
-`add()`.
+NBT values are represented by the `castle::nbt::Nbt` class.
 
-```cpp
-#include <castle/nbt.hpp>
-
-using castle::nbt::Nbt;
-
-auto root = Nbt::makeCompound("");
-
-root.add(Nbt::makeString("name", "Kronborg"));
-root.add(Nbt::makeInt("health", 20));
-root.add(Nbt::makeLong("xp", 12345));
-root.add(Nbt::makeFloat("speed", 0.1f));
-```
-
-This represents a structure similar to:
-
-```text
-{
-    name: "Kronborg",
-    health: 20,
-    xp: 12345L,
-    speed: 0.1f
-}
-```
-
-### Nested Compounds
-
-Compounds can contain other compounds.
+Create individual tags using static factory methods:
 
 ```cpp
-auto root = Nbt::makeCompound("");
+auto byteTag   = Nbt::makeByte("byte", 127);
+auto shortTag  = Nbt::makeShort("short", 1000);
+auto intTag    = Nbt::makeInt("int", 12345);
+auto longTag   = Nbt::makeLong("long", 123456789LL);
 
+auto floatTag  = Nbt::makeFloat("float", 0.5f);
+auto doubleTag = Nbt::makeDouble("double", 0.75);
+
+auto stringTag = Nbt::makeString("name", "CastleNBT");
+```
+
+Each `Nbt` object stores:
+
+- Its NBT tag type
+- Its name
+- Its value
+
+### Compounds
+
+A `TAG_Compound` contains named NBT tags of different types.
+
+```cpp
 auto player = Nbt::makeCompound("player");
 
 player.add(Nbt::makeString("name", "Steve"));
 player.add(Nbt::makeInt("health", 20));
+player.add(Nbt::makeLong("xp", 12345));
+```
 
+Compounds can contain other compounds.
+
+```cpp
 auto position = Nbt::makeCompound("position");
 
 position.add(Nbt::makeDouble("x", 10.5));
@@ -202,31 +228,30 @@ position.add(Nbt::makeDouble("y", 64.0));
 position.add(Nbt::makeDouble("z", -32.5));
 
 player.add(std::move(position));
-root.add(std::move(player));
-
-auto bytes = root.compile();
 ```
 
-The resulting structure is similar to:
+The resulting structure is conceptually equivalent to:
 
-```text
+```snbt
 {
     player: {
         name: "Steve",
         health: 20,
+        xp: 12345L,
         position: {
-            x: 10.5,
-            y: 64.0,
-            z: -32.5
+            x: 10.5d,
+            y: 64.0d,
+            z: -32.5d
         }
     }
 }
 ```
 
+This is an illustration of the resulting data, not output from an SNBT serializer.
+
 ### Lists
 
-NBT lists contain unnamed elements and all elements must use the same
-NBT tag type.
+A `TAG_List` contains unnamed elements of the same NBT type.
 
 ```cpp
 auto numbers = Nbt::makeList("numbers");
@@ -236,7 +261,17 @@ numbers.append(std::int32_t{20});
 numbers.append(std::int32_t{30});
 ```
 
-Lists can also contain more complex NBT types such as compounds:
+Elements can also be created explicitly:
+
+```cpp
+auto numbers = Nbt::makeList("numbers");
+
+numbers.append(Nbt::makeInt("", 10));
+numbers.append(Nbt::makeInt("", 20));
+numbers.append(Nbt::makeInt("", 30));
+```
+
+Lists can contain complex NBT values, including compounds.
 
 ```cpp
 auto inventory = Nbt::makeList("inventory");
@@ -251,269 +286,434 @@ pickaxe.add(Nbt::makeInt("count", 1));
 
 inventory.append(std::move(sword));
 inventory.append(std::move(pickaxe));
-
-auto root = Nbt::makeCompound("");
-root.add(std::move(inventory));
-
-auto bytes = root.compile();
 ```
 
-CastleNBT checks that elements added to an NBT list use the same tag
-type.
-
-For example, adding an `TAG_Int` to a list containing `TAG_String`
-elements will result in an error.
+CastleNBT validates that list elements have matching NBT tag types.
 
 ### Arrays
 
-NBT defines three specialized array types:
+NBT defines three specialized array types.
 
-- `TAG_Byte_Array`
-- `TAG_Int_Array`
-- `TAG_Long_Array`
-
-CastleNBT supports all three:
+**Byte Array**
 
 ```cpp
-auto root = Nbt::makeCompound("");
-
-root.add(
-    Nbt::makeByteArray(
-        "bytes",
-        {1, 2, 3}
-    )
+auto bytes = Nbt::makeByteArray(
+    "bytes",
+    {1, 2, 3, 4, 5}
 );
-
-root.add(
-    Nbt::makeIntArray(
-        "ints",
-        {100, 200, 300}
-    )
-);
-
-root.add(
-    Nbt::makeLongArray(
-        "longs",
-        {1000, 2000, 3000}
-    )
-);
-
-auto bytes = root.compile();
 ```
 
-### Serializing NBT
-
-There are two ways to serialize an NBT structure.
-
-#### Return a new byte vector
+**Int Array**
 
 ```cpp
-std::vector<std::uint8_t> data = root.compile();
+auto integers = Nbt::makeIntArray(
+    "integers",
+    {100, 200, 300}
+);
 ```
 
-#### Append to an existing byte vector
+**Long Array**
+
+```cpp
+auto longs = Nbt::makeLongArray(
+    "longs",
+    {1000, 2000, 3000}
+);
+```
+
+Unlike `TAG_List`, specialized arrays contain primitive numeric values rather than individual `Nbt` objects.
+
+### Accessing NBT Values
+
+CastleNBT provides accessors for the tag type, name, and underlying value.
+
+```cpp
+auto tag = Nbt::makeInt("health", 20);
+
+auto type = tag.tag();
+auto name = tag.name();
+
+const auto& value = tag.value();
+```
+
+Values are stored in `NbtValue`, a `std::variant` containing the supported C++ value types.
+
+Retrieve a specific value using `std::get`:
+
+```cpp
+std::int32_t health =
+    std::get<std::int32_t>(tag.value());
+```
+
+CastleNBT also provides a tag-based getter:
+
+```cpp
+std::int32_t health =
+    tag.get<castle::nbt::NbtTag::IntTag>();
+```
+
+The requested type must match the actual NBT tag type.
+
+**Renaming tags**
+
+```cpp
+tag.rename("playerHealth");
+```
+
+Remove a tag name:
+
+```cpp
+tag.clearName();
+```
+
+Create a renamed copy:
+
+```cpp
+auto copy = tag.renamed("newHealth");
+```
+
+### Writing NBT
+
+The high-level writing API is provided by `NbtWriter`.
+
+```cpp
+#include <castle/writer.hpp>
+```
+
+**Write to a new byte vector**
+
+```cpp
+auto data = NbtWriter::writer(root);
+```
+
+**Append to an existing byte vector**
 
 ```cpp
 std::vector<std::uint8_t> data;
 
-root.compile(data);
+NbtWriter::writer(root, data);
 ```
 
-The resulting byte vector contains the binary NBT representation of
-the structure.
+The writer serializes NBT data using the standard big-endian binary format.
 
-## API Overview
+**Write to a file**
 
-The main CastleNBT type is:
+The current writer returns binary data that can be saved using standard C++ file I/O.
 
 ```cpp
-castle::nbt::Nbt
+#include <fstream>
+
+auto data = NbtWriter::writer(root);
+
+std::ofstream file("example.nbt", std::ios::binary);
+
+file.write(
+    reinterpret_cast<const char*>(data.data()),
+    static_cast<std::streamsize>(data.size())
+);
 ```
 
-### Creating tags
+A dedicated file-writing interface is planned.
 
-Tags can be created using the static factory functions:
+### Reading NBT
+
+The new high-level reading API is provided by `NbtReader`.
 
 ```cpp
-Nbt::makeByte(...)
-Nbt::makeShort(...)
-Nbt::makeInt(...)
-Nbt::makeLong(...)
-Nbt::makeFloat(...)
-Nbt::makeDouble(...)
-Nbt::makeByteArray(...)
-Nbt::makeString(...)
-Nbt::makeList(...)
-Nbt::makeCompound(...)
-Nbt::makeIntArray(...)
-Nbt::makeLongArray(...)
+#include <castle/reader.hpp>
 ```
 
-### Compounds
+> [!CAUTION]
+> The reader interface is present in `dev`, but its implementation is still being finalized. The following examples describe the intended public API and should be used after the reader fixes are completed.
 
-Add a child to a compound with:
+**Read from binary data**
 
 ```cpp
-compound.add(child);
+std::vector<std::uint8_t> data = /* NBT binary data */;
+
+Nbt root = NbtReader::reader(data);
 ```
 
-### Lists
+The reader identifies the NBT tag types and constructs the corresponding `Nbt` objects.
 
-Append an element to a list with:
+**Read from a specific offset**
 
 ```cpp
-list.append(value);
+std::size_t offset = 0;
+
+Nbt root = NbtReader::reader(data, offset);
 ```
 
-### Access tag information
+The offset-based overload allows callers to specify where reading begins and retrieve the resulting position.
 
-The tag type can be retrieved with:
+**Read from a stream**
 
 ```cpp
-auto type = nbt.tag();
+#include <fstream>
+
+std::ifstream file("example.nbt", std::ios::binary);
+
+Nbt root = NbtReader::reader(file);
 ```
 
-The tag name can be retrieved with:
+The stream-reading overload is intended to support reading NBT from files and other C++ input streams.
+
+### Reading and Writing Options
+
+CastleNBT provides option structures for customizing its high-level interfaces.
+
+**WriteOptions**
 
 ```cpp
-auto name = nbt.name();
+castle::nbt::WriteOptions options;
+
+options.namelessRoot = false;
+options.wrapNonCompoundRoot = true;
+
+auto data = NbtWriter::writer(root, options);
 ```
 
-The underlying value can be retrieved with:
+Available options:
+
+| Option | Default | Description |
+|---|---|---|
+| `namelessRoot` | `false` | Controls writing a root without a name field |
+| `wrapNonCompoundRoot` | `true` | Wraps a non-compound root in a compound |
+
+When non-compound root wrapping is enabled, CastleNBT creates a compound root containing the original tag.
+
+If that tag has no name, the wrapper uses `"value"` as the child name.
+
+**ReadOptions**
 
 ```cpp
-const auto& value = nbt.value();
+castle::nbt::ReadOptions options;
+
+options.namelessRoot = false;
+options.allowTrailingBytes = false;
+options.maxDepth = 512;
 ```
 
-### Rename a tag
+The reading options are declared in the current development API.
+
+They are not yet fully applied by the reader implementation and should not be relied upon for validation or parsing behavior until completed.
+
+## Low-Level API
+
+In addition to `NbtReader` and `NbtWriter`, CastleNBT provides low-level functions for working with individual NBT tags.
+
+The low-level interfaces are declared in:
 
 ```cpp
-nbt.rename("newName");
+#include <castle/lowlevel/readTag.hpp>
+#include <castle/lowlevel/writeTag.hpp>
 ```
 
-or remove its name:
+Individual read functions include:
 
 ```cpp
-nbt.clearName();
+FromTagByte(...)
+FromTagShort(...)
+FromTagInt(...)
+FromTagLong(...)
+FromTagFloat(...)
+FromTagDouble(...)
+FromTagByteArray(...)
+FromTagString(...)
+FromTagList(...)
+FromTagCompound(...)
+FromTagIntArray(...)
+FromTagLongArray(...)
 ```
 
-### Serialization
+These functions operate on binary data and support offset-based parsing.
 
-Serialize an NBT value with:
+Corresponding low-level write functions are also available.
+
+The reading API uses `std::span<const std::uint8_t>` to reference binary data without requiring ownership of the buffer.
+
+> [!WARNING]
+> The low-level API is experimental. Its interfaces, names, and behavior may change before 0.2.0.
+>
+> The direct-value reading helpers are still being developed and should not yet be considered stable.
+
+## Breaking Changes in 0.2.0
+
+The upcoming 0.2.0 release introduces significant API changes compared with 0.1.0.
+
+### 1. Serialization moved to NbtWriter
+
+In version 0.1.0, serialization was performed through the `Nbt` object:
 
 ```cpp
-auto data = nbt.compile();
+auto data = root.compile();
 ```
 
-or:
+The development branch uses a separate writer interface:
 
 ```cpp
-std::vector<std::uint8_t> data;
-nbt.compile(data);
+auto data = NbtWriter::writer(root);
 ```
 
-## Building CastleNBT
+The old `compile()` methods are no longer part of the active public interface.
 
-Clone the repository:
+### 2. New reader interface
+
+The development branch introduces `NbtReader` for parsing binary NBT data into `Nbt` objects.
+
+```cpp
+Nbt root = NbtReader::reader(data);
+```
+
+This functionality was not available in 0.1.0.
+
+### 3. Templated container operations
+
+The `add()` and `append()` methods now use templates.
+
+This allows callers to work with `Nbt` objects and supported underlying value types.
+
+```cpp
+compound.add(Nbt::makeInt("health", 20));
+
+list.append(std::int32_t{10});
+```
+
+### 4. New typed value accessor
+
+The `Nbt` class provides a tag-based getter:
+
+```cpp
+auto value = tag.get<NbtTag::IntTag>();
+```
+
+The existing `value()` method remains available.
+
+### 5. Reading and writing configuration
+
+The new high-level APIs introduce `ReadOptions` and `WriteOptions`.
+
+These provide a place for configuration without changing every reading or writing function signature.
+
+### 6. Compatibility
+
+CastleNBT is still in the `0.x` development series.
+
+Breaking API changes may occur between releases as the library evolves.
+
+Users upgrading from 0.1.0 should review the new reader, writer, and container interfaces before updating.
+
+## Building
+
+Clone the repository and switch to the development branch.
 
 ```bash
 git clone https://github.com/kronborg6/CastleNBT.git
+
 cd CastleNBT
+
+git switch dev
 ```
 
-Configure the project:
+Configure CMake:
 
 ```bash
 cmake -S . -B build
 ```
 
-Build it:
+Build the library:
 
 ```bash
 cmake --build build
 ```
 
-When CastleNBT is built as the top-level project, the development tool
-is also built:
+When built as the top-level project, CastleNBT also builds the development executable:
 
 ```text
 castleNBTTool
 ```
 
-## Running Tests
+## Testing
 
 CastleNBT uses GoogleTest for automated testing.
 
-Configure and build the project:
+Configure the project with testing enabled:
 
 ```bash
 cmake -S . -B build -DBUILD_TESTING=ON
+```
+
+Build:
+
+```bash
 cmake --build build
 ```
 
-Run the tests with:
+Run all registered tests:
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
 
-The serialization tests compare generated NBT byte streams against
-expected binary output.
+Testing covers NBT serialization and other library behavior as the implementation develops.
 
-## Version 0.1.0
-
-`0.1.0` is the first development release of CastleNBT.
-
-The primary goal of this version is to provide the core NBT data model
-and binary serialization.
-
-### Implemented
-
-- NBT value representation
-- All standard NBT value types
-- Compound tags
-- List tags
-- Homogeneous list validation
-- Nested NBT structures
-- Byte arrays
-- Int arrays
-- Long arrays
-- Binary NBT serialization
-- Big-endian numeric encoding
-- Automated serialization tests
-- CMake integration
-
-The API should still be considered unstable during the `0.x` releases
-and may change as the library develops.
+Additional reader, round-trip, validation, and error-handling tests are planned for the 0.2.0 release.
 
 ## Roadmap
 
-Planned features include:
+### 0.2.0 — Reading and Writing API
 
-- Binary NBT parsing
-- Reading NBT from files
-- Writing NBT directly to files
-- NBT to SNBT conversion
-- SNBT parsing
-- Human-readable NBT output
-- Parsing human-readable NBT
-- Compressed NBT support
+The main development goals for version 0.2.0 are:
 
-See [TODO.md](TODO.md) for the current development notes.
+- [x] Separate high-level writing interface
+- [x] Introduce high-level reading interface
+- [x] Implement binary tag readers
+- [x] Support offset-based reading
+- [x] Introduce reading and writing options
+- [ ] Complete reader validation and option handling
+- [ ] Complete direct-value low-level readers
+- [ ] Expand reader and round-trip tests
+- [ ] Finalize the 0.2.0 API
+
+### Future Development
+
+- [ ] Dedicated NBT file reading and writing APIs
+- [ ] NBT to SNBT conversion
+- [ ] SNBT parsing
+- [ ] Human-readable NBT tree output
+- [ ] Parsing human-readable NBT
+- [ ] Gzip and Zlib compression support
+- [ ] Additional validation and error reporting
+
+See [TODO.md](TODO.md) for development notes.
 
 ## Project Structure
 
 ```text
 CastleNBT/
 ├── include/
-│   └── castle/          Public library headers
+│   └── castle/
+│       ├── nbt.hpp
+│       ├── reader.hpp
+│       ├── writer.hpp
+│       └── lowlevel/
+│           ├── common.hpp
+│           ├── readTag.hpp
+│           └── writeTag.hpp
 │
-├── src/                 Library implementation
+├── src/
+│   ├── createNbt.cpp
+│   ├── endian.cpp
+│   ├── variable.cpp
+│   ├── writeNbt.cpp
+│   ├── writeTag.cpp
+│   ├── readTag.cpp
+│   ├── writer.cpp
+│   ├── reader.cpp
+│   └── nbt.cpp
 │
-├── tests/               GoogleTest test suite
-│
-├── tools/               Development/testing executable
-│
+├── tests/
+├── tools/
 ├── CMakeLists.txt
 ├── LICENSE
 ├── README.md
@@ -522,22 +722,20 @@ CastleNBT/
 
 ## Motivation
 
-CastleNBT was created as part of **CastleCraft**, a Minecraft server
-project that I am developing from scratch.
+CastleNBT was created as part of CastleCraft, a personal project to build a Minecraft server from scratch in C++.
 
-Instead of using an existing NBT library, I wanted to implement the
-format myself to better understand topics such as:
+Rather than using an existing NBT library, the goal is to implement the format directly and gain a deeper understanding of:
 
-- binary serialization
-- byte ordering and endianness
-- binary data formats
-- recursive data structures
-- type-safe C++ APIs
-- memory and data representation
-- the Minecraft protocol and file formats
+- Binary serialization and parsing
+- Byte ordering and endianness
+- Binary file formats
+- Recursive data structures
+- Modern C++ library design
+- Memory and data representation
+- The Minecraft protocol and related data formats
+- Automated testing and build systems
 
-The project is also an opportunity for me to improve my understanding
-of modern C++, library design, CMake and automated testing.
+CastleNBT is both a usable library project and an opportunity to explore modern C++ and systems programming.
 
 ## License
 
