@@ -1,5 +1,6 @@
-#include <algorithm>
+#include "castle/lowlevel/readTag.hpp"
 #include <castle/nbt.hpp>
+#include <istream>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -45,6 +46,24 @@ namespace castle::nbt {
   Nbt Nbt::makeLongArray(std::string name, std::vector<std::int64_t> value) {
     return Nbt(name, NbtTag::LongArrayTag, value);
   }
+
+  // Nbt parse(std::span<const uint8_t> data) {
+  //   std::size_t offset = 0;
+  //   return readNbt(data, offset);
+  // }
+  // Nbt parse(std::span<const uint8_t> data, std::size_t& offset) {
+  //   return readNbt(data, offset);
+  // }
+  // Nbt parse(std::istream& input) {
+  //   if (!input) {
+  //     throw std::runtime_error("input stream not readable");
+  //   }
+  //   std::vector<uint8_t> buf(std::istreambuf_iterator<char>(input), {});
+  //
+  //   std::size_t offset = 0;
+  //
+  //   return readNbt(buf, offset);
+  // }
 
   Nbt makeNbt(const NbtValue& value) {
     return makeNbt(std::string{}, value);

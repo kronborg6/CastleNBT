@@ -1,10 +1,6 @@
 #pragma once
 
 #include "castle/nbt.hpp"
-#include <optional>
-#include <string>
-#include <variant>
-#include <vector>
 
 namespace castle::nbt {
   enum class VariableType {
@@ -24,4 +20,5 @@ namespace castle::nbt {
 
   NbtTag tagFromVarible(const NbtValue& value);
   VariableType fromVarible(NbtValue value);
+
 } // namespace castle::nbt

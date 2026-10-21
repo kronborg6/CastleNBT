@@ -1,6 +1,7 @@
 #pragma once
 #include "castle/lowlevel/common.hpp"
 #include "castle/nbt.hpp"
+#include "castle/reader.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <span>
@@ -12,6 +13,7 @@
 
 namespace castle::nbt {
 
+  Nbt readNbt(std::span<const uint8_t> data, std::size_t& offset, ReadOptions options = {});
   std::string readTagHeader(std::span<const std::uint8_t> data,
                             std::size_t& offset,
                             NbtTag exepted,

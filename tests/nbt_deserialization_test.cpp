@@ -1,4 +1,5 @@
 #include "castle/lowlevel/readTag.hpp"
+#include "castle/writer.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -120,8 +121,8 @@ TEST(NbtDeserialization, Byte) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
+  // root.compile(result);
 
   EXPECT_EQ(result, data);
 }
@@ -150,8 +151,7 @@ TEST(NbtDeserialization, Short) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -182,8 +182,7 @@ TEST(NbtDeserialization, Int) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -207,8 +206,7 @@ TEST(NbtDeserialization, Long) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -232,8 +230,7 @@ TEST(NbtDeserialization, Float) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -257,8 +254,7 @@ TEST(NbtDeserialization, Double) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -283,8 +279,7 @@ TEST(NbtDeserialization, ByteArray) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -310,8 +305,7 @@ TEST(NbtDeserialization, String) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -337,8 +331,7 @@ TEST(NbtDeserialization, IntArray) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -365,8 +358,7 @@ TEST(NbtDeserialization, LongArray) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -387,8 +379,7 @@ TEST(NbtDeserialization, ListWith2Int) {
   auto root = Nbt::makeCompound("");
   root.add(std::move(tag));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, data);
 }
@@ -402,8 +393,7 @@ TEST(NbtDeserialization, HelloWorldFromSpec) {
   EXPECT_EQ(tag.name(), "hello world");
   EXPECT_EQ(offset, data.size());
 
-  std::vector<std::uint8_t> result;
-  tag.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(tag);
   EXPECT_EQ(result, data);
 }
 TEST(NbtDeserialization, EveryTruncationThrows) {

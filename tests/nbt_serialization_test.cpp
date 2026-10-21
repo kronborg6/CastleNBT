@@ -1,4 +1,5 @@
 #include "castle/nbt.hpp"
+#include "castle/writer.hpp"
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <stdexcept>
@@ -16,8 +17,7 @@ TEST(NbtSerialization, EmptyRootCompound) {
   // clang-format on
   Nbt root = castle::nbt::Nbt::makeCompound("");
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expted);
 }
@@ -38,8 +38,7 @@ TEST(NbtSerialization, CompoundWithString) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeString("hello", "world"));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -57,8 +56,7 @@ TEST(NbtSerialization, Byte) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeByte("test", 127));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -77,8 +75,7 @@ TEST(NbtSerialization, Short) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeShort("test", 32767));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -97,8 +94,7 @@ TEST(NbtSerialization, Int) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeInt("test", 2147483647));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -118,8 +114,7 @@ TEST(NbtSerialization, Long) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeLong("test", INT64_MAX));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -138,8 +133,7 @@ TEST(NbtSerialization, Float) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeFloat("test", 0.5f));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -159,8 +153,7 @@ TEST(NbtSerialization, Double) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeDouble("test", 0.5));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -178,8 +171,7 @@ TEST(NbtSerialization, ByteArray) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeByteArray("test", {1, 2, 3}));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -198,8 +190,7 @@ TEST(NbtSerialization, String) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeString("test", "hello"));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -225,8 +216,7 @@ TEST(NbtSerialization, List) {
 
   root.add(std::move(list));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -248,15 +238,12 @@ TEST(NbtSerialization, ListWithCompounds) {
   auto root = Nbt::makeCompound("");
   auto list = Nbt::makeList("list");
 
-  list.append(
-      Nbt::makeCompound("this does not matter becus is gona be set to emty"));
-  list.append(
-      Nbt::makeCompound("this does not matter becus is gona be set to emty"));
+  list.append(Nbt::makeCompound("this does not matter becus is gona be set to emty"));
+  list.append(Nbt::makeCompound("this does not matter becus is gona be set to emty"));
 
   root.add(std::move(list));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -274,8 +261,7 @@ TEST(NbtSerialization, EmptyList) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeList("list"));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -285,8 +271,7 @@ TEST(NbtSerialization, ListRejectsDifferentTypes) {
 
   list.append(Nbt::makeCompound(""));
 
-  EXPECT_THROW(list.append(Nbt::makeString("this does not matter")),
-               std::runtime_error);
+  EXPECT_THROW(list.append(Nbt::makeString("this does not matter")), std::runtime_error);
 }
 
 TEST(NbtSerialization, Compound) {
@@ -306,8 +291,7 @@ TEST(NbtSerialization, Compound) {
   compound.add(Nbt::makeByte("x", 42));
   root.add(std::move(compound));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -327,8 +311,7 @@ TEST(NbtSerialization, IntArray) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeIntArray("test", {1, 256}));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -348,8 +331,7 @@ TEST(NbtSerialization, LongArray) {
   auto root = Nbt::makeCompound("");
   root.add(Nbt::makeLongArray("test", {1, 256}));
 
-  std::vector<std::uint8_t> result;
-  root.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
   EXPECT_EQ(result, expected);
 }
@@ -475,10 +457,9 @@ TEST(NbtSerialization, AllTagTypes) {
   root.add(Nbt::makeLongArray("longArray", {1, 256}));
 
   // Serialize
-  std::vector<std::uint8_t> result = root.compile();
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
-  ASSERT_EQ(result.size(), expected.size())
-      << "Serialized NBT size does not match";
+  ASSERT_EQ(result.size(), expected.size()) << "Serialized NBT size does not match";
 
   for (std::size_t i = 0; i < std::min(result.size(), expected.size()); ++i) {
     EXPECT_EQ(result[i], expected[i])
@@ -489,7 +470,7 @@ TEST(NbtSerialization, AppendsToExistingBuffer) {
   auto root = Nbt::makeCompound("");
 
   std::vector<std::uint8_t> result = {0xAA};
-  root.compile(result);
+  castle::nbt::NbtWriter::writer(root, result);
 
   ASSERT_FALSE(result.empty());
   EXPECT_EQ(result.front(), 0xAA);

@@ -19,6 +19,8 @@ add_library(castleNBT STATIC
     src/writeNbt.cpp
     src/writeTag.cpp
     src/readTag.cpp
+    src/writer.cpp
+    src/reader.cpp
     src/nbt.cpp
 )
 

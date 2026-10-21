@@ -10,27 +10,6 @@
 
 namespace castle::nbt {
 
-  constexpr std::string_view kDefaultWrapKey = "value";
-
-  void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data, WriteOptions options) {
-
-    if (node.tag() == NbtTag::EndTag) {
-      throw std::runtime_error("root tag can't be a endTag");
-    }
-    TagContext ctx = options.namelessRoot ? TagContext::NamelessRoot : TagContext::Named;
-    if (node.tag() != NbtTag::CompoundTag && options.wrapNonCompoundRoot) {
-
-      writeNbt(Nbt::makeCompound("",
-                                 std::vector<Nbt>{node.name().empty()
-                                                      ? node.renamed(std::string(kDefaultWrapKey))
-                                                      : node}),
-               data,
-               ctx);
-    } else {
-      writeNbt(node, data, ctx);
-    }
-  }
-
   void writeNbt(const Nbt& node, std::vector<uint8_t>& data, TagContext context) {
     switch (node.tag()) {
     case NbtTag::EndTag:
@@ -124,18 +103,18 @@ namespace castle::nbt {
     _init = true;
   };
 
-  void castle::nbt::Nbt::compile(std::vector<std::uint8_t>& output) {
-    if (_tag != NbtTag::CompoundTag) {
-      writeNbtDocument(*this, output);
-    } else {
-      writeNbt(*this, output);
-    }
-  }
+  // void castle::nbt::Nbt::compile(std::vector<std::uint8_t>& output) {
+  //   if (_tag != NbtTag::CompoundTag) {
+  //     writeNbtDocument(*this, output);
+  //   } else {
+  //     writeNbt(*this, output);
+  //   }
+  // }
 
-  std::vector<std::uint8_t> castle::nbt::Nbt::compile() {
-    std::vector<std::uint8_t> output;
-    compile(output);
-    return output;
-  }
+  // std::vector<std::uint8_t> castle::nbt::Nbt::compile() {
+  //   std::vector<std::uint8_t> output;
+  //   compile(output);
+  //   return output;
+  // }
 
 } // namespace castle::nbt

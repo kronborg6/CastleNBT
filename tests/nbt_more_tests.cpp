@@ -1,4 +1,5 @@
 #include "castle/lowlevel/readTag.hpp"
+#include "castle/writer.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -36,8 +37,7 @@ namespace {
     auto root = Nbt::makeCompound("");
     root.add(std::move(tag));
 
-    std::vector<std::uint8_t> result;
-    root.compile(result);
+    std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
     EXPECT_EQ(result, data);
   }
@@ -441,8 +441,7 @@ TEST(NbtDeserialization, CompoundEmpty) {
   EXPECT_EQ(offset, data.size());
   EXPECT_EQ(tag.tag(), NbtTag::CompoundTag);
 
-  std::vector<std::uint8_t> result;
-  tag.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(tag);
   EXPECT_EQ(result, data);
 }
 
@@ -491,8 +490,7 @@ TEST(NbtDeserialization, CompoundNestedThenSibling) {
 
   EXPECT_EQ(offset, data.size());
 
-  std::vector<std::uint8_t> result;
-  tag.compile(result);
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(tag);
   EXPECT_EQ(result, data);
 }
 

@@ -1,3 +1,4 @@
+#include "castle/writer.hpp"
 #include <castle/lowlevel/readTag.hpp>
 #include <castle/nbt.hpp>
 #include <cstddef>
@@ -19,7 +20,20 @@ void printHex(const std::vector<uint8_t>& data) {
 
 int main(void) {
 
-  castle::nbt::Nbt root = castle::nbt::Nbt::makeList("names");
+  std::vector<std::uint8_t> expted = {
+      0x0a, // Root compound
+      0x00, // Frist child tag
+      0x00, // Name length
+      0x00  // End compound
+  };
+  // clang-format on
+  Nbt root = castle::nbt::Nbt::makeCompound("");
+
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
+
+  printHex(result);
+
+  // castle::nbt::Nbt root = castle::nbt::Nbt::makeList("names");
 
   // root.append(castle::nbt::Nbt::makeString("", "Mikkel"));
   // root.append(castle::nbt::Nbt::makeString("", "Tina"));
@@ -31,15 +45,15 @@ int main(void) {
   // stats.add(castle::nbt::Nbt::makeFloat("mana", 26.04f));
   // stats.add(castle::nbt::Nbt::makeInt("xp", 26));
   // root.add(stats);
-  std::vector<uint8_t> data = root.compile();
+  // std::vector<uint8_t> data = root.compile();
 
   size_t offset = 3;
 
   // const auto& elements = std::get<std::vector<Nbt>>(list.value());
-  printHex(data);
-  std::span<const std::uint8_t> ro = data;
-  castle::nbt::Nbt w = castle::nbt::FromTagList(ro, offset);
-  printHex(w.compile());
+  // printHex(data);
+  // std::span<const std::uint8_t> ro = data;
+  // castle::nbt::Nbt w = castle::nbt::FromTagList(ro, offset);
+  // printHex(w.compile());
 
   // for (castle::nbt::Nbt ta : root.get<castle::nbt::NbtTag::CompoundTag>()) {
   //   std::cout << "name: " << ta.name() << "\n";

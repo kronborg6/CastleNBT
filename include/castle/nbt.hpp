@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <istream>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -34,17 +35,7 @@ namespace castle::nbt {
     IntArrayTag = 0x0B,
     LongArrayTag = 0x0C,
   };
-
-  struct WriteOptions {
-      bool namelessRoot = false;       // network format, no root name field
-      bool wrapNonCompoundRoot = true; // set to false to allow e.g. a bare StringTag root
-  };
-  struct ReadOptions {
-      // Endian endian = Endian::Big; // Bedrock files use little endian
-      bool namelessRoot = false; // network format, no root name field
-      bool allowTrailingBytes = false;
-      std::size_t maxDepth = 512;
-  };
+  // struct WriteOptions;
   class Nbt;
 
   template <NbtTag Tag> struct NbtValueOf;
@@ -98,8 +89,9 @@ namespace castle::nbt {
   Nbt makeNbt(std::string name, const NbtValue& value);
   Nbt makeNbt(const NbtValue& value);
 
-  void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data, WriteOptions options = {});
-  Nbt readNbtDocument(std::span<const uint8_t> data, std::size_t& offset);
+  // void writeNbtDocument(const Nbt& node, std::vector<uint8_t>& data, WriteOptions options = {});
+  // Nbt readNbtDocument(std::span<const uint8_t> data, std::size_t& offset, ReadOptions options =
+  // {}); Nbt readNbt(std::span<const uint8_t> data, std::size_t& offset, ReadOptions options = {});
   class Nbt {
     public:
       static Nbt makeByte(std::string name, std::int8_t value);
@@ -114,6 +106,10 @@ namespace castle::nbt {
       static Nbt makeCompound(std::string name, std::vector<Nbt> value = {});
       static Nbt makeIntArray(std::string name, std::vector<std::int32_t> value = {});
       static Nbt makeLongArray(std::string name, std::vector<std::int64_t> value = {});
+
+      // static Nbt parse(std::span<const uint8_t> data);
+      // static Nbt parse(std::span<const uint8_t> data, std::size_t& offset);
+      // static Nbt parse(std::istream& input);
 
       template <typename T> void add(T child) {
         if (_init == false) {
@@ -211,14 +207,14 @@ namespace castle::nbt {
        *
        * @param output The vector to append the serialized bytes to.
        */
-      void compile(std::vector<std::uint8_t>& output);
+      // void compile(std::vector<std::uint8_t>& output);
 
       /**
        * @brief Compile the NBT tag into binary format.
        *
        * @return std::vector<std::uint8_t> The serialized bytes.
        */
-      std::vector<std::uint8_t> compile();
+      // std::vector<std::uint8_t> compile();
 
       NbtTag tag() const {
         return _tag;
