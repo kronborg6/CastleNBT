@@ -53,13 +53,17 @@ namespace castle::nbt {
                     std::size_t& offset,
                     nbt::TagContext context = TagContext::Named);
 
-  Nbt FromTagList(std::span<const uint8_t> data,
-                  std::size_t& offset,
-                  nbt::TagContext context = TagContext::Named);
+  Nbt FromTagList(std::span<const std::uint8_t> data,
+                  size_t& offset,
+                  nbt::TagContext context = TagContext::Named,
+                  std::size_t coutDepth = 0,
+                  std::size_t maxDepth = 512);
 
   Nbt FromTagCompound(std::span<const std::uint8_t> data,
                       size_t& offset,
-                      nbt::TagContext context = TagContext::Named);
+                      nbt::TagContext context = TagContext::Named,
+                      std::size_t coutDepth = 0,
+                      std::size_t maxDepth = 512);
 
   Nbt FromTagIntArray(std::span<const uint8_t> data,
                       std::size_t& offset,

@@ -20,18 +20,28 @@ void printHex(const std::vector<uint8_t>& data) {
 
 int main(void) {
 
-  std::vector<std::uint8_t> expted = {
-      0x0a, // Root compound
-      0x00, // Frist child tag
-      0x00, // Name length
-      0x00  // End compound
-  };
-  // clang-format on
-  Nbt root = castle::nbt::Nbt::makeCompound("");
+  // constexpr std::size_t depth = 1000;
+  //
+  // std::vector<std::uint8_t> data = {0x0A, 0x00, 0x00};
+  // for (std::size_t i = 0; i < depth; ++i) {
+  //   data.insert(data.end(), {0x0A, 0x00, 0x00}); // another nested compound
+  // }
+  // data.insert(data.end(), depth + 1, 0x00); // matching TAG_Ends
+  //
+  // std::size_t offset = 0;
+  // castle::nbt::FromTagCompound(data, offset);
+  // std::vector<std::uint8_t> expted = {
+  //     0x0a, // Root compound
+  //     0x00, // Frist child tag
+  //     0x00, // Name length
+  //     0x00  // End compound
+  // };
+  // // clang-format on
+  // Nbt root = castle::nbt::Nbt::makeCompound("");
+  //
+  // std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
 
-  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
-
-  printHex(result);
+  // printHex(data);
 
   // castle::nbt::Nbt root = castle::nbt::Nbt::makeList("names");
 
@@ -47,7 +57,7 @@ int main(void) {
   // root.add(stats);
   // std::vector<uint8_t> data = root.compile();
 
-  size_t offset = 3;
+  // size_t offset = 3;
 
   // const auto& elements = std::get<std::vector<Nbt>>(list.value());
   // printHex(data);

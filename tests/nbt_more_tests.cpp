@@ -15,8 +15,6 @@ using castle::nbt::TagContext;
 
 namespace {
 
-  using Reader = Nbt (*)(std::span<const std::uint8_t>, std::size_t&, TagContext);
-
   // 0A 00 00 <body> 00  -> a nameless-in-file-format ("" name) root compound around `body`
   std::vector<std::uint8_t> makeDoc(const std::vector<std::uint8_t>& body) {
     std::vector<std::uint8_t> doc = {0x0A, 0x00, 0x00};
@@ -27,10 +25,23 @@ namespace {
 
   // Reads one tag starting at offset 3 (right after the root header), checks that the whole
   // body was consumed (offset ends on the final TAG_End), then writes it back and compares.
+  //
+  // `read` can be a 3-parameter reader (byte, int, string, arrays, ...) or the 5-parameter
+  // FromTagList / FromTagCompound that also take depth and maxDepth.
+  template <typename Reader>
   void expectRoundTrip(const std::vector<std::uint8_t>& data, Reader read) {
     std::size_t offset = 3;
 
-    Nbt tag = read(data, offset, TagContext::Named);
+    Nbt tag = [&]() -> Nbt {
+      if constexpr (std::is_invocable_v<Reader,
+                                        std::span<const std::uint8_t>,
+                                        std::size_t&,
+                                        TagContext>) {
+        return read(data, offset, TagContext::Named);
+      } else {
+        return read(data, offset, TagContext::Named, 0, 512);
+      }
+    }();
 
     EXPECT_EQ(offset, data.size() - 1);
 
@@ -518,7 +529,7 @@ TEST(NbtDeserialization, CompoundTruncatedChildThrows) {
 }
 
 // Enable once the depth limit exists (vanilla uses 512). Without one, this overflows the stack.
-TEST(NbtDeserialization, DISABLED_CompoundTooDeepThrows) {
+TEST(NbtDeserialization, CompoundTooDeepThrows) {
   constexpr std::size_t depth = 1000;
 
   std::vector<std::uint8_t> data = {0x0A, 0x00, 0x00};
