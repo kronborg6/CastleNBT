@@ -13,11 +13,11 @@ namespace castle::nbt {
   Nbt NbtReader::reader(std::span<const std::uint8_t> bytes,
                         std::size_t& offset,
                         ReadOptions options) {
-    return readNbt(bytes, offset);
+    return readNbt(bytes, offset, options);
   }
   Nbt NbtReader::reader(std::span<const std::uint8_t> bytes, ReadOptions options) {
-    std::size_t offset;
-    return readNbt(bytes, offset);
+    std::size_t offset = 0;
+    return readNbt(bytes, offset, options);
   }
   Nbt NbtReader::reader(std::istream& stream, ReadOptions options) {
 
@@ -27,7 +27,7 @@ namespace castle::nbt {
 
     std::vector<std::uint8_t> bytes{std::istreambuf_iterator<char>(stream), {}};
 
-    std::size_t offset;
-    return readNbt(bytes, offset);
+    std::size_t offset = 0;
+    return readNbt(bytes, offset, options);
   }
 } // namespace castle::nbt

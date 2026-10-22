@@ -15,6 +15,7 @@ add_executable(unit_tests
     nbt_class_test.cpp
     nbt_deserialization_test.cpp
     nbt_more_tests.cpp
+    nbt_reader_test.cpp
 )
 
 target_include_directories(unit_tests

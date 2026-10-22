@@ -15,12 +15,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(castleNBT STATIC
     src/createNbt.cpp
     src/endian.cpp
+    src/reader.cpp
+    src/readNbt.cpp
+    src/readTag.cpp
     src/variable.cpp
     src/writeNbt.cpp
-    src/writeTag.cpp
-    src/readTag.cpp
     src/writer.cpp
-    src/reader.cpp
+    src/writeTag.cpp
     src/nbt.cpp
 )
 
