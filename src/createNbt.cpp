@@ -12,59 +12,41 @@
 namespace castle::nbt {
 
   Nbt Nbt::makeCompound(std::string name, std::vector<Nbt> value) {
-    return Nbt(name, NbtTag::CompoundTag, value);
+    return Nbt(std::move(name), NbtTag::CompoundTag, std::move(value));
   }
   Nbt Nbt::makeString(std::string name, std::string value) {
-    return Nbt(name, NbtTag::StringTag, value);
+    return Nbt(std::move(name), NbtTag::StringTag, std::move(value));
   }
   Nbt Nbt::makeByte(std::string name, std::int8_t value) {
-    return Nbt(name, NbtTag::ByteTag, value);
+    return Nbt(std::move(name), NbtTag::ByteTag, std::move(value));
   }
   Nbt Nbt::makeShort(std::string name, std::int16_t value) {
-    return Nbt(name, NbtTag::ShortTag, value);
+    return Nbt(std::move(name), NbtTag::ShortTag, std::move(value));
   }
   Nbt Nbt::makeInt(std::string name, std::int32_t value) {
-    return Nbt(name, NbtTag::IntTag, value);
+    return Nbt(std::move(name), NbtTag::IntTag, std::move(value));
   }
   Nbt Nbt::makeLong(std::string name, std::int64_t value) {
-    return Nbt(name, NbtTag::LongTag, value);
+    return Nbt(std::move(name), NbtTag::LongTag, std::move(value));
   }
   Nbt Nbt::makeFloat(std::string name, float value) {
-    return Nbt(name, NbtTag::FloatTag, value);
+    return Nbt(std::move(name), NbtTag::FloatTag, std::move(value));
   }
   Nbt Nbt::makeDouble(std::string name, double value) {
-    return Nbt(name, NbtTag::DoubleTag, value);
+    return Nbt(std::move(name), NbtTag::DoubleTag, std::move(value));
   }
   Nbt Nbt::makeByteArray(std::string name, std::vector<std::int8_t> value) {
-    return Nbt(name, NbtTag::ByteArrayTag, value);
+    return Nbt(std::move(name), NbtTag::ByteArrayTag, std::move(value));
   }
   Nbt Nbt::makeList(std::string name, std::vector<Nbt> value) {
     return Nbt(std::move(name), NbtTag::ListTag, std::move(value));
   }
   Nbt Nbt::makeIntArray(std::string name, std::vector<std::int32_t> value) {
-    return Nbt(name, NbtTag::IntArrayTag, value);
+    return Nbt(std::move(name), NbtTag::IntArrayTag, std::move(value));
   }
   Nbt Nbt::makeLongArray(std::string name, std::vector<std::int64_t> value) {
-    return Nbt(name, NbtTag::LongArrayTag, value);
+    return Nbt(std::move(name), NbtTag::LongArrayTag, std::move(value));
   }
-
-  // Nbt parse(std::span<const uint8_t> data) {
-  //   std::size_t offset = 0;
-  //   return readNbt(data, offset);
-  // }
-  // Nbt parse(std::span<const uint8_t> data, std::size_t& offset) {
-  //   return readNbt(data, offset);
-  // }
-  // Nbt parse(std::istream& input) {
-  //   if (!input) {
-  //     throw std::runtime_error("input stream not readable");
-  //   }
-  //   std::vector<uint8_t> buf(std::istreambuf_iterator<char>(input), {});
-  //
-  //   std::size_t offset = 0;
-  //
-  //   return readNbt(buf, offset);
-  // }
 
   Nbt makeNbt(const NbtValue& value) {
     return makeNbt(std::string{}, value);

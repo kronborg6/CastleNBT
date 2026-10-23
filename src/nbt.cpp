@@ -99,7 +99,7 @@ namespace castle::nbt {
   }
 
   castle::nbt::Nbt::Nbt(std::string name, castle::nbt::NbtTag tag, NbtValue value)
-      : _name(name), _tag(tag), _value(value) {
+      : _name(std::move(name)), _tag(std::move(tag)), _value(std::move(value)) {
     _init = true;
   };
 
