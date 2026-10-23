@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
 #include <istream>
 #include <span>
 #include <stdexcept>
@@ -12,6 +13,30 @@
 #include <utility>
 #include <variant>
 #include <vector>
+
+namespace {
+  struct Tracer {
+      Tracer() = default;
+
+      Tracer(const Tracer&) {
+        std::cout << "copy ctor\n";
+      }
+
+      Tracer(Tracer&&) noexcept {
+        std::cout << "move ctor\n";
+      }
+
+      Tracer& operator=(const Tracer&) {
+        std::cout << "copy assign\n";
+        return *this;
+      }
+
+      Tracer& operator=(Tracer&&) noexcept {
+        std::cout << "move assign\n";
+        return *this;
+      }
+  };
+} // namespace
 
 namespace castle::nbt {
 
@@ -247,6 +272,8 @@ namespace castle::nbt {
       castle::nbt::NbtTag _tag;
       NbtValue _value;
       bool _init = false;
+
+      Tracer _tracer;
   };
 
   constexpr std::uint8_t tag(NbtTag value) noexcept;

@@ -184,6 +184,10 @@ namespace castle::nbt {
             "exepted: {} found: {}", std::to_underlying(listType), std::to_underlying(lastType)));
       }
 
+      if (depth > maxDepth) {
+        throw std::runtime_error("amx Depth reached");
+      }
+
       switch (listType) {
       case NbtTag::EndTag:
         if (listLength > 0) {
@@ -224,11 +228,12 @@ namespace castle::nbt {
         break;
       case NbtTag::ListTag:
         lastType = NbtTag::ListTag;
-        values.push_back(FromTagList(data, offset, TagContext::ListElement, depth, maxDepth));
+        values.push_back(FromTagList(data, offset, TagContext::ListElement, depth + 1, maxDepth));
         break;
       case NbtTag::CompoundTag:
         lastType = NbtTag::CompoundTag;
-        values.push_back(FromTagCompound(data, offset, TagContext::ListElement, depth, maxDepth));
+        values.push_back(
+            FromTagCompound(data, offset, TagContext::ListElement, depth + 1, maxDepth));
         break;
       case NbtTag::IntArrayTag:
         lastType = NbtTag::IntArrayTag;

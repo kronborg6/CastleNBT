@@ -1,6 +1,16 @@
 #include "castle/lowlevel/common.hpp"
 #include "castle/lowlevel/readTag.hpp"
 #include "castle/nbt.hpp"
+#include <cstddef>
+#include <stdexcept>
+
+namespace {
+  void checkTrailingBytes(bool allow, const std::size_t& dataLength, const std::size_t& offset) {
+    if (!allow && dataLength > offset) {
+      throw std::runtime_error("Trailing Bytes is not allowed");
+    }
+  }
+} // namespace
 
 namespace castle::nbt {
 
@@ -15,11 +25,13 @@ namespace castle::nbt {
       throw std::runtime_error("frist Tag needs to be a CompoundTag");
     }
 
-    if (options.namelessRoot) {
-      return FromTagCompound(data, offset, TagContext::NamelessRoot);
-    }
+    TagContext ctx = options.namelessRoot ? TagContext::NamelessRoot : TagContext::Named;
 
-    return FromTagCompound(data, offset);
+    Nbt nbt = FromTagCompound(data, offset, ctx, 0, options.maxDepth);
+
+    checkTrailingBytes(options.allowTrailingBytes, data.size(), offset);
+
+    return nbt;
   }
 
 } // namespace castle::nbt

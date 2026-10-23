@@ -133,3 +133,55 @@ TEST(NbtReader, EmptyStreamThrows) {
   std::istringstream stream("", std::ios::binary);
   EXPECT_ANY_THROW(NbtReader::reader(stream));
 }
+
+TEST(NbtReader, TrailingBytes) {
+  std::vector<std::uint8_t> bytes; // junk before the document
+  bytes.insert(bytes.begin(), helloWorld().begin(), helloWorld().end());
+  bytes.insert(bytes.end(), 0x0F);
+
+  std::size_t offset = 0;
+
+  EXPECT_THROW(NbtReader::reader(bytes, offset), std::runtime_error);
+}
+
+TEST(NbtReader, TrailingBytesAllowed) {
+  std::vector<std::uint8_t> bytes; // junk before the document
+  bytes.insert(bytes.begin(), helloWorld().begin(), helloWorld().end());
+  bytes.insert(bytes.end(), 0x0F);
+
+  std::size_t offset = 0;
+
+  EXPECT_NO_THROW(NbtReader::reader(bytes, offset, {.allowTrailingBytes = true}));
+}
+
+// ---- maxDepth ----
+
+namespace {
+
+  // Root compound holding one list named "l", nested `levels` lists deep:
+  // { l: [[[[ ... [] ... ]]]] }
+  std::vector<std::uint8_t> nestedLists(std::size_t levels) {
+    std::vector<std::uint8_t> bytes = {0x0A, 0x00, 0x00, // root compound, empty name
+                                       0x09, 0x00, 0x01, 'l'}; // TAG_List "l"
+
+    for (std::size_t i = 0; i < levels; i++) {
+      // this list holds 1 element, and that element is another list
+      bytes.insert(bytes.end(), {0x09, 0x00, 0x00, 0x00, 0x01});
+    }
+
+    bytes.insert(bytes.end(), {0x00, 0x00, 0x00, 0x00, 0x00}); // innermost list: type End, length 0
+    bytes.push_back(0x00);                                      // TAG_End for the root
+    return bytes;
+  }
+
+} // namespace
+
+TEST(NbtReaderDepth, ShallowNestedListsAreRead) {
+  // proves nestedLists() builds valid NBT, so the test below fails for the right reason
+  EXPECT_NO_THROW(NbtReader::reader(nestedLists(10)));
+}
+
+TEST(NbtReaderDepth, DeeplyNestedListsThrow) {
+  // far past the default maxDepth of 512, but shallow enough not to overflow the stack
+  EXPECT_THROW(NbtReader::reader(nestedLists(2000)), std::runtime_error);
+}

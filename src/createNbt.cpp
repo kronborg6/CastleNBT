@@ -1,4 +1,5 @@
 #include "castle/lowlevel/readTag.hpp"
+#include <algorithm>
 #include <castle/nbt.hpp>
 #include <istream>
 #include <stdexcept>
@@ -38,7 +39,7 @@ namespace castle::nbt {
     return Nbt(name, NbtTag::ByteArrayTag, value);
   }
   Nbt Nbt::makeList(std::string name, std::vector<Nbt> value) {
-    return Nbt(name, NbtTag::ListTag, value);
+    return Nbt(std::move(name), NbtTag::ListTag, std::move(value));
   }
   Nbt Nbt::makeIntArray(std::string name, std::vector<std::int32_t> value) {
     return Nbt(name, NbtTag::IntArrayTag, value);
