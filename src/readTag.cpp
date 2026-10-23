@@ -161,6 +161,11 @@ namespace castle::nbt {
                   nbt::TagContext context,
                   std::size_t depth,
                   std::size_t maxDepth) {
+
+    if (depth > maxDepth) {
+      throw std::runtime_error("amx Depth reached");
+    }
+
     std::string name = readTagHeader(data, offset, NbtTag::ListTag, context);
 
     if (offset >= data.size()) {
@@ -182,10 +187,6 @@ namespace castle::nbt {
       if (listType != lastType) {
         throw std::runtime_error(std::format(
             "exepted: {} found: {}", std::to_underlying(listType), std::to_underlying(lastType)));
-      }
-
-      if (depth > maxDepth) {
-        throw std::runtime_error("amx Depth reached");
       }
 
       switch (listType) {
@@ -391,10 +392,9 @@ namespace castle::nbt {
       return std::get<std::string>(nbt::FromTagByte(data, offset).value());
     }
 
-    std::vector<castle::nbt::NbtValue>
+    std::vector<castle::nbt::Nbt>
     FromTagList(std::span<const uint8_t>& data, std::size_t& offset, nbt::TagContext context) {
-      // return std::get<std::vector<NbtValue>>(nbt::FromTagByte(data,
-      // offset).value());
+      return std::get<std::vector<Nbt>>(nbt::FromTagByte(data, offset).value());
     }
 
     std::vector<castle::nbt::Nbt>

@@ -103,18 +103,4 @@ namespace castle::nbt {
     _init = true;
   };
 
-  // void castle::nbt::Nbt::compile(std::vector<std::uint8_t>& output) {
-  //   if (_tag != NbtTag::CompoundTag) {
-  //     writeNbtDocument(*this, output);
-  //   } else {
-  //     writeNbt(*this, output);
-  //   }
-  // }
-
-  // std::vector<std::uint8_t> castle::nbt::Nbt::compile() {
-  //   std::vector<std::uint8_t> output;
-  //   compile(output);
-  //   return output;
-  // }
-
 } // namespace castle::nbt

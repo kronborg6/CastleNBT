@@ -45,7 +45,12 @@ namespace {
 } // namespace
 
 int main(void) {
-  castle::nbt::NbtReader::reader(nestedLists(2000), {.maxDepth = 3000});
+
+  auto root = Nbt::makeCompound("");
+  root.add(Nbt::makeString("hello", "world"));
+
+  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
+  // castle::nbt::NbtReader::reader(nestedLists(2000), {.maxDepth = 3000});
   // constexpr std::size_t depth = 1000;
   //
   // std::vector<std::uint8_t> data = {0x0A, 0x00, 0x00};

@@ -120,6 +120,31 @@ TEST(NbtClass, ListAppendElements) {
   EXPECT_EQ(std::get<std::int32_t>(elements[1].value()), 20);
 }
 
+TEST(NbtClass, ListAppendStringKeepsContent) {
+  auto list = Nbt::makeList("names");
+
+  list.append(std::string("Steve"));
+
+  const auto& elements = std::get<std::vector<Nbt>>(list.value());
+
+  ASSERT_EQ(elements.size(), 1);
+  EXPECT_EQ(elements[0].tag(), NbtTag::StringTag);
+  EXPECT_EQ(std::get<std::string>(elements[0].value()), "Steve");
+}
+
+TEST(NbtClass, ListAppendIntArrayKeepsContent) {
+  auto list = Nbt::makeList("arrays");
+
+  list.append(std::vector<std::int32_t>{1, 2, 3});
+
+  const auto& elements = std::get<std::vector<Nbt>>(list.value());
+
+  ASSERT_EQ(elements.size(), 1);
+  EXPECT_EQ(elements[0].tag(), NbtTag::IntArrayTag);
+  EXPECT_EQ(std::get<std::vector<std::int32_t>>(elements[0].value()),
+            (std::vector<std::int32_t>{1, 2, 3}));
+}
+
 TEST(NbtClass, ListRejectsDifferentTypes) {
   auto list = Nbt::makeList("items");
   list.append(Nbt::makeInt("", 10));

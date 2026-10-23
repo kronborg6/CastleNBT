@@ -14,29 +14,29 @@
 #include <variant>
 #include <vector>
 
-namespace {
-  struct Tracer {
-      Tracer() = default;
-
-      Tracer(const Tracer&) {
-        std::cout << "copy ctor\n";
-      }
-
-      Tracer(Tracer&&) noexcept {
-        std::cout << "move ctor\n";
-      }
-
-      Tracer& operator=(const Tracer&) {
-        std::cout << "copy assign\n";
-        return *this;
-      }
-
-      Tracer& operator=(Tracer&&) noexcept {
-        std::cout << "move assign\n";
-        return *this;
-      }
-  };
-} // namespace
+// namespace {
+//   struct Tracer {
+//       Tracer() = default;
+//
+//       Tracer(const Tracer&) {
+//         std::cout << "copy ctor\n";
+//       }
+//
+//       Tracer(Tracer&&) noexcept {
+//         std::cout << "move ctor\n";
+//       }
+//
+//       Tracer& operator=(const Tracer&) {
+//         std::cout << "copy assign\n";
+//         return *this;
+//       }
+//
+//       Tracer& operator=(Tracer&&) noexcept {
+//         std::cout << "move assign\n";
+//         return *this;
+//       }
+//   };
+// } // namespace
 
 namespace castle::nbt {
 
@@ -184,14 +184,7 @@ namespace castle::nbt {
           throw std::runtime_error("all list elements must have the same tag");
         }
 
-        if constexpr (std::is_same_v<T, Nbt>) {
-          values->push_back(nbt);
-        } else {
-
-          NbtValue value = child;
-
-          values->push_back(makeNbt(value));
-        }
+        values->push_back(nbt);
       }
 
       template <NbtTag Tag> const typename NbtValueOf<Tag>::type& get() const {
@@ -273,7 +266,7 @@ namespace castle::nbt {
       NbtValue _value;
       bool _init = false;
 
-      Tracer _tracer;
+      // Tracer _tracer;
   };
 
   constexpr std::uint8_t tag(NbtTag value) noexcept;
