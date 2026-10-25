@@ -3,6 +3,12 @@
 #include "castle/lowlevel/writeTag.hpp"
 #include "castle/nbt.hpp"
 #include <cstdint>
+#include <fstream>
+#include <ios>
+#include <iterator>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 #include <vector>
 namespace castle::nbt {
 
@@ -23,10 +29,21 @@ namespace castle::nbt {
                data,
                ctx);
     } else {
-      if (options.wrapNonCompoundRoot) {
+      if (options.wrapNonCompoundRoot && options.namelessRoot) {
 
-        writeNbt(node, data, TagContext::NonCompoundRoot);
+        writeNbt(node, data, TagContext::NamelessRootAndNonCompoundRoot);
+        if (options.namelessRoot) {
+
+        } else {
+
+          writeNbt(node, data, TagContext::NonCompoundRoot);
+        }
         // data.erase(data.begin(), data.begin() + 1);
+      } else if (options.wrapNonCompoundRoot) {
+        writeNbt(node, data, TagContext::NonCompoundRoot);
+      } else if (options.namelessRoot) {
+
+        writeNbt(node, data, ctx);
       } else {
 
         writeNbt(node, data, ctx);
@@ -42,6 +59,25 @@ namespace castle::nbt {
 
     writeRoot(tag, output, options);
     return output;
+  }
+  void NbtWriter::writer(const Nbt& tag, const std::string& path, WriteOptions options) {
+    std::vector<std::uint8_t> output;
+    writeRoot(tag, output, options);
+
+    std::ofstream file(path, std::ios::binary);
+
+    if (!file) {
+      throw std::runtime_error("Failed to open file: " + path);
+    }
+
+    file.write(reinterpret_cast<const char*>(output.data()),
+               static_cast<std::streamsize>(output.size()));
+
+    file.close();
+
+    if (!file) {
+      throw std::runtime_error("Failed to write file: " + path);
+    }
   }
 
 } // namespace castle::nbt

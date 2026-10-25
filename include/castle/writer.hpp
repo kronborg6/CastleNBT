@@ -18,5 +18,6 @@ namespace castle::nbt {
       static void
       writer(const Nbt& tag, std::vector<std::uint8_t>& data, WriteOptions options = {});
       static std::vector<std::uint8_t> writer(const Nbt& tag, WriteOptions options = {});
+      static void writer(const Nbt& tag, const std::string& path, WriteOptions options = {});
   };
 } // namespace castle::nbt
