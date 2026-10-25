@@ -3,13 +3,18 @@
 #include "castle/lowlevel/writeTag.hpp"
 #include "castle/nbt.hpp"
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <ios>
-#include <iterator>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <filesystem>
+#include <fstream>
+#include <ios>
 namespace castle::nbt {
 
   constexpr std::string_view kDefaultWrapKey = "value";
@@ -73,6 +78,9 @@ namespace castle::nbt {
     file.write(reinterpret_cast<const char*>(output.data()),
                static_cast<std::streamsize>(output.size()));
 
+    std::string file_path = std::filesystem::absolute(path).string();
+
+    std::cout << "file path:" << file_path << "\n";
     file.close();
 
     if (!file) {
