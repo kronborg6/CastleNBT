@@ -11,6 +11,7 @@ namespace castle::nbt {
       // Endian endian = Endian::Big; // Bedrock files use little endian
       bool namelessRoot = false; // network format, no root name field
       bool allowTrailingBytes = false;
+      bool allowNonCompoundRoot = true;
       std::size_t maxDepth = 512;
   };
 

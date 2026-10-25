@@ -34,12 +34,20 @@ namespace castle::nbt {
     if (offset >= data.size()) {
       throw std::runtime_error("unexpected end of data");
     }
+    if (context == TagContext::NonCompoundRoot) {
+      return "";
+    }
 
     if (context == TagContext::NamelessRoot) {
       if (static_cast<NbtTag>(data[offset++]) != exepted) {
         throw std::runtime_error("unexpected tag type");
       }
       return ""; // no name field follows
+    }
+
+    if (context == TagContext::NamelessRootAndNonCompoundRoot) {
+      offset++;
+      return "";
     }
 
     if (context == TagContext::ListElement) {
@@ -344,6 +352,86 @@ namespace castle::nbt {
         throw std::runtime_error(std::format("Undefined NBT tag: {}", std::to_underlying(nextTag)));
         break;
       }
+    }
+    if (context == TagContext::NonCompoundRoot) {
+      if (values.size() > 1) {
+        throw std::runtime_error("when root is not compound only one tag i allowed");
+      }
+      Nbt temp = values.front();
+      return temp;
+    }
+    throw std::runtime_error("missing end Tag");
+  }
+
+  Nbt NonCompoundRoot(std::span<const std::uint8_t> data,
+                      size_t& offset,
+                      nbt::TagContext context,
+                      std::size_t depth,
+                      std::size_t maxDepth) {
+    NbtTag nextTag = static_cast<NbtTag>(data[offset]);
+    std::string name = "";
+    if (context != TagContext::NamelessRootAndNonCompoundRoot) {
+
+      name = readTagHeader(data, offset, nextTag, context);
+    }
+    std::vector<Nbt> values;
+    while (offset < data.size()) {
+      if (depth > maxDepth) {
+        throw std::runtime_error("amx Depth reached");
+      }
+
+      switch (nextTag) {
+      case NbtTag::EndTag:
+        offset++;
+        return Nbt::makeCompound(std::move(name), std::move(values));
+      case NbtTag::ByteTag:
+        values.push_back(FromTagByte(data, offset, context));
+        break;
+      case NbtTag::ShortTag:
+        values.push_back(FromTagShort(data, offset, context));
+        break;
+      case NbtTag::IntTag:
+        values.push_back(FromTagInt(data, offset, context));
+        break;
+      case NbtTag::LongTag:
+        values.push_back(FromTagLong(data, offset, context));
+        break;
+      case NbtTag::FloatTag:
+        values.push_back(FromTagFloat(data, offset, context));
+        break;
+      case NbtTag::DoubleTag:
+        values.push_back(FromTagDouble(data, offset, context));
+        break;
+      case NbtTag::ByteArrayTag:
+        values.push_back(FromTagByteArray(data, offset, context));
+        break;
+      case NbtTag::StringTag:
+        values.push_back(FromTagString(data, offset, context));
+        break;
+      case NbtTag::ListTag:
+        values.push_back(FromTagList(data, offset, TagContext::Named, depth + 1, maxDepth));
+        break;
+      case NbtTag::CompoundTag:
+        values.push_back(FromTagCompound(data, offset, TagContext::Named, depth + 1, maxDepth));
+        break;
+      case NbtTag::IntArrayTag:
+        values.push_back(FromTagIntArray(data, offset, context));
+        break;
+      case NbtTag::LongArrayTag:
+        values.push_back(FromTagLongArray(data, offset, context));
+        break;
+      default:
+        throw std::runtime_error(std::format("Undefined NBT tag: {}", std::to_underlying(nextTag)));
+        break;
+      }
+    }
+    if (context == TagContext::NonCompoundRoot ||
+        context == TagContext::NamelessRootAndNonCompoundRoot) {
+      if (values.size() > 1) {
+        throw std::runtime_error("when root is not compound only one tag i allowed");
+      }
+      Nbt temp = values.front();
+      return temp;
     }
     throw std::runtime_error("missing end Tag");
   }

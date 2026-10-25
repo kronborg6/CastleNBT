@@ -83,10 +83,10 @@ namespace castle::nbt {
       using type = double;
   };
   template <> struct NbtValueOf<NbtTag::ByteArrayTag> {
-      using type = std::string;
+      using type = std::vector<int8_t>;
   };
   template <> struct NbtValueOf<NbtTag::StringTag> {
-      using type = std::vector<int8_t>;
+      using type = std::string;
   };
   template <> struct NbtValueOf<NbtTag::ListTag> {
       using type = std::vector<Nbt>;
@@ -95,6 +95,9 @@ namespace castle::nbt {
       using type = std::vector<Nbt>;
   };
   template <> struct NbtValueOf<NbtTag::IntArrayTag> {
+      using type = std::vector<int32_t>;
+  };
+  template <> struct NbtValueOf<NbtTag::LongArrayTag> {
       using type = std::vector<int64_t>;
   };
 

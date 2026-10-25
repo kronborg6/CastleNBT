@@ -21,11 +21,32 @@ namespace castle::nbt {
 
     NbtTag tag = static_cast<NbtTag>(data[offset]);
 
-    if (tag != NbtTag::CompoundTag) {
-      throw std::runtime_error("frist Tag needs to be a CompoundTag");
+    TagContext ctx = options.namelessRoot ? TagContext::NamelessRoot : TagContext::Named;
+    if (options.namelessRoot && options.allowNonCompoundRoot) {
+      ctx = TagContext::NamelessRootAndNonCompoundRoot;
     }
 
-    TagContext ctx = options.namelessRoot ? TagContext::NamelessRoot : TagContext::Named;
+    if (tag != NbtTag::CompoundTag) {
+      if (options.allowNonCompoundRoot) {
+
+        if (ctx == TagContext::NamelessRootAndNonCompoundRoot) {
+
+          Nbt nbt = NonCompoundRoot(
+              data, offset, TagContext::NamelessRootAndNonCompoundRoot, 0, options.maxDepth);
+
+          checkTrailingBytes(options.allowTrailingBytes, data.size(), offset);
+
+          return nbt;
+        }
+
+        Nbt nbt = NonCompoundRoot(data, offset, TagContext::NonCompoundRoot, 0, options.maxDepth);
+
+        checkTrailingBytes(options.allowTrailingBytes, data.size(), offset);
+
+        return nbt;
+      }
+      throw std::runtime_error("frist Tag needs to be a CompoundTag");
+    }
 
     Nbt nbt = FromTagCompound(data, offset, ctx, 0, options.maxDepth);
 

@@ -185,3 +185,32 @@ TEST(NbtReaderDepth, DeeplyNestedListsThrow) {
   // far past the default maxDepth of 512, but shallow enough not to overflow the stack
   EXPECT_THROW(NbtReader::reader(nestedLists(2000)), std::runtime_error);
 }
+
+TEST(NbtReaderDepth, SmallMaxDepthIsRespected) {
+  // nesting that is fine with the default limit must throw with a smaller one
+  ASSERT_NO_THROW(NbtReader::reader(nestedLists(10)));
+  EXPECT_THROW(NbtReader::reader(nestedLists(10), {.maxDepth = 5}), std::runtime_error);
+}
+
+TEST(NbtReaderDepth, LargerMaxDepthAllowsDeeperNesting) {
+  EXPECT_NO_THROW(NbtReader::reader(nestedLists(2000), {.maxDepth = 3000}));
+}
+
+TEST(NbtReaderDepth, ListOfEndTagWithLengthThrows) {
+  // element type End means "empty list"; a non-zero length is corrupt data
+  std::vector<std::uint8_t> bytes = {0x0A, 0x00, 0x00,            // root compound
+                                     0x09, 0x00, 0x01, 'l',       // TAG_List "l"
+                                     0x00, 0x00, 0x00, 0x00, 0x03, // type End, length 3
+                                     0x00};                       // root TAG_End
+  EXPECT_THROW(NbtReader::reader(bytes), std::runtime_error);
+}
+
+TEST(NbtReader, StreamReadsFromCurrentPosition) {
+  // a stream that was partly consumed should be read from where it is, not from the start
+  std::vector<std::uint8_t> bytes = {0xDE, 0xAD};
+  bytes.insert(bytes.end(), helloWorld().begin(), helloWorld().end());
+  auto stream = toStream(bytes);
+  stream.ignore(2);
+
+  expectHelloWorld(NbtReader::reader(stream));
+}

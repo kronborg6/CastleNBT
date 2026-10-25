@@ -4,6 +4,8 @@ namespace castle::nbt {
   enum class TagContext {
     Named,
     ListElement,
-    NamelessRoot
+    NonCompoundRoot,
+    NamelessRoot,
+    NamelessRootAndNonCompoundRoot
   };
 } // namespace castle::nbt

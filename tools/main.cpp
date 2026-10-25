@@ -46,106 +46,21 @@ namespace {
 
 int main(void) {
 
-  auto root = Nbt::makeCompound("");
-  root.add(Nbt::makeString("hello", "world"));
+  // const auto bytes = castle::nbt::NbtWriter::writer(Nbt::makeString("greetinggg", "hello"),
+  //                                                   {.wrapNonCompoundRoot = false});
 
-  std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
-  // castle::nbt::NbtReader::reader(nestedLists(2000), {.maxDepth = 3000});
-  // constexpr std::size_t depth = 1000;
-  //
-  // std::vector<std::uint8_t> data = {0x0A, 0x00, 0x00};
-  // for (std::size_t i = 0; i < depth; ++i) {
-  //   data.insert(data.end(), {0x0A, 0x00, 0x00}); // another nested compound
-  // }
-  // data.insert(data.end(), depth + 1, 0x00); // matching TAG_Ends
-  //
-  // std::size_t offset = 0;
-  // castle::nbt::FromTagCompound(data, offset);
-  // std::vector<std::uint8_t> expted = {
-  //     0x0a, // Root compound
-  //     0x00, // Frist child tag
-  //     0x00, // Name length
-  //     0x00  // End compound
-  // };
-  // // clang-format on
-  // Nbt root = castle::nbt::Nbt::makeCompound("");
-  //
-  // std::vector<std::uint8_t> result = castle::nbt::NbtWriter::writer(root);
+  const auto bytes2 = castle::nbt::NbtWriter::writer(
+      Nbt::makeString("", "hello"), {.namelessRoot = true, .wrapNonCompoundRoot = false});
 
-  // printHex(data);
+  const std::vector<std::uint8_t> expected = {0x08, 0x00, 0x05, 'h', 'e', 'l', 'l', 'o'};
 
-  // castle::nbt::Nbt root = castle::nbt::Nbt::makeList("names");
+  const Nbt root = castle::nbt::NbtReader::reader(expected, {.namelessRoot = true});
+  printHex(bytes2);
+  printHex(expected);
 
-  // root.append(castle::nbt::Nbt::makeString("", "Mikkel"));
-  // root.append(castle::nbt::Nbt::makeString("", "Tina"));
-  // root.append(castle::nbt::Nbt::makeString("", "Kristian"));
-  // root.append(castle::nbt::Nbt::makeString("", "kronborg"));
-  // root.add(castle::nbt::Nbt::makeInt("age", 26));
-  // castle::nbt::Nbt stats = castle::nbt::Nbt::makeCompound("stats");
-  // stats.add(castle::nbt::Nbt::makeInt("health", 26));
-  // stats.add(castle::nbt::Nbt::makeFloat("mana", 26.04f));
-  // stats.add(castle::nbt::Nbt::makeInt("xp", 26));
-  // root.add(stats);
-  // std::vector<uint8_t> data = root.compile();
-
-  // size_t offset = 3;
-
-  // const auto& elements = std::get<std::vector<Nbt>>(list.value());
-  // printHex(data);
-  // std::span<const std::uint8_t> ro = data;
-  // castle::nbt::Nbt w = castle::nbt::FromTagList(ro, offset);
-  // printHex(w.compile());
-
-  // for (castle::nbt::Nbt ta : root.get<castle::nbt::NbtTag::CompoundTag>()) {
-  //   std::cout << "name: " << ta.name() << "\n";
-  //   if (ta.tag() == castle::nbt::NbtTag::CompoundTag) {
-  //     for (castle::nbt::Nbt taIner : ta.get<castle::nbt::NbtTag::CompoundTag>()) {
-  //       std::cout << "chiled name: " << taIner.name() << "\n";
-  //     }
-  //   }
-  // }
-  // std::cout << "name is: " << w.name() << "\n ";
-
-  // castle::nbt::Nbt root = castle::nbt::Nbt::makeString("hello", "kronborg");
-  // castle::nbt::writeNbt(root, data, true);
+  // const Nbt root =
+  //     castle::nbt::NbtReader::reader(bytes); // if this throws, gtest reports the test as failed
+  // printHex(castle::nbt::NbtWriter::writer(root, {.wrapNonCompoundRoot = false}));
 
   return 0;
 }
-// compound check
-
-// int main(void) {
-//
-//   castle::nbt::Nbt root = castle::nbt::Nbt::makeCompound("g");
-//
-//   root.add(castle::nbt::Nbt::makeString("name", "kronborg"));
-//   root.add(castle::nbt::Nbt::makeInt("age", 26));
-//   castle::nbt::Nbt stats = castle::nbt::Nbt::makeCompound("stats");
-//   stats.add(castle::nbt::Nbt::makeInt("health", 26));
-//   stats.add(castle::nbt::Nbt::makeFloat("mana", 26.04f));
-//   stats.add(castle::nbt::Nbt::makeInt("xp", 26));
-//   root.add(stats);
-//   std::vector<uint8_t> data = root.compile();
-//
-//   size_t offset = 0;
-//
-//   // const auto& elements = std::get<std::vector<Nbt>>(list.value());
-//   printHex(data);
-//   std::span<const std::uint8_t> ro = data;
-//   castle::nbt::Nbt w = castle::nbt::FromTagCompound(ro, offset);
-//   printHex(w.compile());
-//
-//   for (castle::nbt::Nbt ta : root.get<castle::nbt::NbtTag::CompoundTag>()) {
-//     std::cout << "name: " << ta.name() << "\n";
-//     if (ta.tag() == castle::nbt::NbtTag::CompoundTag) {
-//       for (castle::nbt::Nbt taIner : ta.get<castle::nbt::NbtTag::CompoundTag>()) {
-//         std::cout << "chiled name: " << taIner.name() << "\n";
-//       }
-//     }
-//   }
-//   // std::cout << "name is: " << w.name() << "\n ";
-//
-//   // castle::nbt::Nbt root = castle::nbt::Nbt::makeString("hello", "kronborg");
-//   // castle::nbt::writeNbt(root, data, true);
-//
-//   return 0;
-// }

@@ -5,6 +5,10 @@
 #include <vector>
 namespace castle::nbt {
 
+  enum CompressenLevel {
+    Compressen
+  };
+
   struct WriteOptions {
       bool namelessRoot = false;       // network format, no root name field
       bool wrapNonCompoundRoot = true; // set to false to allow e.g. a bare StringTag root

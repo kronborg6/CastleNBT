@@ -23,7 +23,14 @@ namespace castle::nbt {
                data,
                ctx);
     } else {
-      writeNbt(node, data, ctx);
+      if (options.wrapNonCompoundRoot) {
+
+        writeNbt(node, data, TagContext::NonCompoundRoot);
+        // data.erase(data.begin(), data.begin() + 1);
+      } else {
+
+        writeNbt(node, data, ctx);
+      }
     }
   }
 
