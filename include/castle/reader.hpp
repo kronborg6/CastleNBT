@@ -7,6 +7,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <vector>
 namespace castle::nbt {
 
   struct ReadOptions {
@@ -23,5 +24,7 @@ namespace castle::nbt {
       static Nbt reader(std::span<const std::uint8_t> bytes, ReadOptions options = {});
       static Nbt reader(std::istream& stream, ReadOptions options = {});
       static Nbt reader(const std::string& path, ReadOptions options = {});
+      static size_t
+      reader(const std::string& path, std::vector<uint8_t>& output, ReadOptions options = {});
   };
 } // namespace castle::nbt

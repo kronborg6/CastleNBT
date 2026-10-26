@@ -2,6 +2,7 @@
 
 #include "castle/lowlevel/readTag.hpp"
 #include "castle/nbt.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -61,5 +62,25 @@ namespace castle::nbt {
     std::size_t offset = 0;
     printHex(data);
     return readNbt(data, offset, options);
+  }
+
+  size_t
+  NbtReader::reader(const std::string& path, std::vector<uint8_t>& output, ReadOptions options) {
+    std::ifstream file(path, std::ios::binary);
+
+    if (!file) {
+      throw std::runtime_error("Failed to open file: " + std::filesystem::absolute(path).string());
+    }
+
+    std::vector<std::uint8_t> data{std::istreambuf_iterator<char>(file),
+                                   std::istreambuf_iterator<char>()};
+
+    std::size_t offset = 0;
+    printHex(data);
+    readNbt(data, offset, options);
+
+    output = std::move(data);
+
+    return offset;
   }
 } // namespace castle::nbt
