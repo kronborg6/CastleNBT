@@ -9,9 +9,16 @@ namespace castle::nbt {
     Compressen
   };
 
+  enum FileType {
+    BIN,
+    SNBT,
+    nbtText
+  };
+
   struct WriteOptions {
       bool namelessRoot = false;       // network format, no root name field
       bool wrapNonCompoundRoot = true; // set to false to allow e.g. a bare StringTag root
+      FileType type = BIN;
   };
 
   struct NbtWriter {

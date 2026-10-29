@@ -2,6 +2,7 @@
 #include "castle/lowlevel/common.hpp"
 #include "castle/lowlevel/writeTag.hpp"
 #include "castle/nbt.hpp"
+#include "snbt.hpp"
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -57,9 +58,18 @@ namespace castle::nbt {
   }
 
   void NbtWriter::writer(const Nbt& tag, std::vector<std::uint8_t>& data, WriteOptions options) {
+    if (options.type == SNBT) {
+      std::string result = snbt::snbt(tag, options);
+      std::cout << result << "\n";
+    }
     writeRoot(tag, data, options);
   }
   std::vector<std::uint8_t> NbtWriter::writer(const Nbt& tag, WriteOptions options) {
+
+    if (options.type == SNBT) {
+      std::string result = snbt::snbt(tag, options);
+      std::cout << result << "\n";
+    }
     std::vector<std::uint8_t> output;
 
     writeRoot(tag, output, options);
@@ -78,9 +88,6 @@ namespace castle::nbt {
     file.write(reinterpret_cast<const char*>(output.data()),
                static_cast<std::streamsize>(output.size()));
 
-    std::string file_path = std::filesystem::absolute(path).string();
-
-    std::cout << "file path:" << file_path << "\n";
     file.close();
 
     if (!file) {
