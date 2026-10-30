@@ -58,10 +58,6 @@ namespace castle::nbt {
   }
 
   void NbtWriter::writer(const Nbt& tag, std::vector<std::uint8_t>& data, WriteOptions options) {
-    if (options.type == SNBT) {
-      std::string result = snbt::snbt(tag, options);
-      std::cout << result << "\n";
-    }
     writeRoot(tag, data, options);
   }
   std::vector<std::uint8_t> NbtWriter::writer(const Nbt& tag, WriteOptions options) {
@@ -93,6 +89,20 @@ namespace castle::nbt {
     if (!file) {
       throw std::runtime_error("Failed to write file: " + path);
     }
+  }
+
+  std::string NbtWriter::snbtWriter(const Nbt& tag, SnbtOptions options) {
+    return snbt::snbt(tag, options);
+  }
+  std::string NbtWriter::snbtWriter(std::span<const uint8_t> rawNbt, SnbtOptions options) {
+  }
+  void NbtWriter::snbtWriter(const Nbt& tag, const std::string& path, SnbtOptions options) {
+    std::string snbt = snbt::snbt(tag, options);
+  }
+  void NbtWriter::snbtWriter(std::span<const uint8_t> rawNbt,
+                             const std::string& path,
+                             SnbtOptions options) {
+    // return snbt::snbt(tag, options);
   }
 
 } // namespace castle::nbt

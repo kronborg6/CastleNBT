@@ -20,7 +20,7 @@ namespace castle::nbt::snbt {
   void FromTagListSNBT(std::string& output, const Nbt& listTag, Options options);
   void addArray(std::string& output, const Nbt& array, Options options);
   // void FromTagCompoundSNBT(std::string& output, const Nbt& tag, WriteOptions options);
-  std::string snbt(const Nbt& root, WriteOptions options) {
+  std::string snbt(const Nbt& root, SnbtOptions options) {
     std::string result;
 
     snbt::Options snbtOption = {options
@@ -64,9 +64,7 @@ namespace castle::nbt::snbt {
     return result;
   }
 
-  void FromTagCompoundSNBT(std::string& output, const Nbt& tag, Options options) {
-    if (!options.options.namelessRoot) {
-    }
+  void FromTagCompoundSNBT(std::string& output, const Nbt& tag, SnbtOptions options) {
     const auto& values = tag.get<NbtTag::CompoundTag>();
     for (const auto& value : values) {
       // addTabs(output, options.tabcout);
