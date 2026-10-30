@@ -10,6 +10,8 @@
 #include <vector>
 
 using castle::nbt::Nbt;
+using castle::nbt::NbtReader;
+using castle::nbt::NbtWriter;
 void printHex(const std::vector<uint8_t>& data) {
   for (uint8_t byte : data) {
     std::cout << "0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte)
@@ -46,21 +48,37 @@ namespace {
 
 int main(void) {
 
-  // const auto bytes = castle::nbt::NbtWriter::writer(Nbt::makeString("greetinggg", "hello"),
-  //                                                   {.wrapNonCompoundRoot = false});
+  Nbt root = Nbt::makeCompound("");
+  root.add(Nbt::makeString("first name", "kronborg"));
+  root.add(Nbt::makeString("lastName", "Mikkel"));
+  root.add(Nbt::makeInt("age", 26));
+  Nbt stats = Nbt::makeCompound("stats");
+  stats.add(Nbt::makeInt("health", 100));
+  stats.add(Nbt::makeDouble("stamina", 53));
+  stats.add(Nbt::makeFloat("mana", 333));
 
-  const auto bytes2 = castle::nbt::NbtWriter::writer(
-      Nbt::makeString("", "hello"), {.namelessRoot = true, .wrapNonCompoundRoot = false});
+  root.add(stats);
+  Nbt lvl = Nbt::makeCompound("lvl");
+  lvl.add(Nbt::makeInt("lvl", 21));
+  lvl.add(Nbt::makeInt("xp", 42141));
+  root.add(lvl);
 
-  const std::vector<std::uint8_t> expected = {0x08, 0x00, 0x05, 'h', 'e', 'l', 'l', 'o'};
+  Nbt inv = Nbt::makeList("invtory");
 
-  const Nbt root = castle::nbt::NbtReader::reader(expected, {.namelessRoot = true});
-  printHex(bytes2);
-  printHex(expected);
+  inv.append("Apple");
+  inv.append("Pinapple");
+  inv.append("Stick");
+  inv.append("Stone");
+  inv.append("Diamond");
+  root.add(inv);
 
-  // const Nbt root =
-  //     castle::nbt::NbtReader::reader(bytes); // if this throws, gtest reports the test as failed
-  // printHex(castle::nbt::NbtWriter::writer(root, {.wrapNonCompoundRoot = false}));
+  Nbt list = Nbt::makeIntArray("numbers", {42, 1, 23, 4512, 11});
+
+  root.add(list);
+  std::vector<std::uint8_t> bytes =
+      NbtWriter::writer(root, {.wrapNonCompoundRoot = false, .type = castle::nbt::SNBT});
+
+  // printHex(bytes);
 
   return 0;
 }
