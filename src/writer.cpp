@@ -2,6 +2,7 @@
 #include "castle/lowlevel/common.hpp"
 #include "castle/lowlevel/writeTag.hpp"
 #include "castle/nbt.hpp"
+#include "castle/reader.hpp"
 #include "snbt.hpp"
 #include <cstdint>
 #include <filesystem>
@@ -62,10 +63,6 @@ namespace castle::nbt {
   }
   std::vector<std::uint8_t> NbtWriter::writer(const Nbt& tag, WriteOptions options) {
 
-    if (options.type == SNBT) {
-      std::string result = snbt::snbt(tag, options);
-      std::cout << result << "\n";
-    }
     std::vector<std::uint8_t> output;
 
     writeRoot(tag, output, options);
@@ -95,14 +92,48 @@ namespace castle::nbt {
     return snbt::snbt(tag, options);
   }
   std::string NbtWriter::snbtWriter(std::span<const uint8_t> rawNbt, SnbtOptions options) {
+    Nbt root = NbtReader::reader(rawNbt, {.namelessRoot = true});
+
+    return snbt::snbt(root, options);
   }
   void NbtWriter::snbtWriter(const Nbt& tag, const std::string& path, SnbtOptions options) {
     std::string snbt = snbt::snbt(tag, options);
+
+    std::ofstream file(path, std::ios::binary);
+
+    if (!file) {
+      throw std::runtime_error("Failed to open file: " + path);
+    }
+
+    file.write(reinterpret_cast<const char*>(snbt.data()),
+               static_cast<std::streamsize>(snbt.size()));
+
+    file.close();
+
+    if (!file) {
+      throw std::runtime_error("Failed to write file: " + path);
+    }
   }
   void NbtWriter::snbtWriter(std::span<const uint8_t> rawNbt,
                              const std::string& path,
                              SnbtOptions options) {
-    // return snbt::snbt(tag, options);
+
+    Nbt tag = NbtReader::reader(rawNbt, {.namelessRoot = true});
+    std::string snbt = snbt::snbt(tag, options);
+    std::ofstream file(path, std::ios::binary);
+
+    if (!file) {
+      throw std::runtime_error("Failed to open file: " + path);
+    }
+
+    file.write(reinterpret_cast<const char*>(snbt.data()),
+               static_cast<std::streamsize>(snbt.size()));
+
+    file.close();
+
+    if (!file) {
+      throw std::runtime_error("Failed to write file: " + path);
+    }
   }
 
 } // namespace castle::nbt

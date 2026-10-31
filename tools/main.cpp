@@ -49,7 +49,7 @@ namespace {
 int main(void) {
 
   Nbt root = Nbt::makeCompound("");
-  root.add(Nbt::makeString("first name", "kronborg"));
+  root.add(Nbt::makeString("first name", "kronborg aka \"mikkel\""));
   root.add(Nbt::makeString("lastName", "Mikkel"));
   root.add(Nbt::makeInt("age", 26));
   Nbt stats = Nbt::makeCompound("stats");
@@ -75,8 +75,9 @@ int main(void) {
   Nbt list = Nbt::makeIntArray("numbers", {42, 1, 23, 4512, 11});
 
   root.add(list);
-  std::vector<std::uint8_t> bytes =
-      NbtWriter::writer(root, {.wrapNonCompoundRoot = false, .type = castle::nbt::SNBT});
+  /* auto snbt = */ NbtWriter::snbtWriter(root, "./temp/player.snbt");
+
+  // std::cout << snbt << "\n";
 
   // printHex(bytes);
 

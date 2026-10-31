@@ -17,16 +17,16 @@ namespace castle::nbt {
     nbtText
   };
 
-  struct SnbtOptions {
-      std::size_t deph = 0;
-      std::size_t indentSize = 4;
-      // std::uint32_t ;
-  };
-
   struct WriteOptions {
       bool namelessRoot = false;       // network format, no root name field
       bool wrapNonCompoundRoot = true; // set to false to allow e.g. a bare StringTag root
-      FileType type = BIN;
+  };
+
+  struct SnbtOptions {
+      WriteOptions writer = {.namelessRoot = true, .wrapNonCompoundRoot = false};
+      std::size_t deph = 0;
+      std::size_t indentSize = 4;
+      // std::uint32_t ;
   };
 
   struct NbtWriter {

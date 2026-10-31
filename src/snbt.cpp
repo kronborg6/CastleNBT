@@ -8,24 +8,18 @@
 #include <vector>
 
 namespace {
-  void addTabs(std::string& output, castle::nbt::snbt::Options options) {
+  void addTabs(std::string& output, castle::nbt::SnbtOptions options) {
     output += std::string(options.indentSize * options.deph, ' ');
-    // for (std::uint32_t i = 0; i < tabs; i++) {
-    //   output += "\t";
-    // }
   }
 } // namespace
 namespace castle::nbt::snbt {
   void addKey(std::string& output, const Nbt& tag);
-  void FromTagListSNBT(std::string& output, const Nbt& listTag, Options options);
-  void addArray(std::string& output, const Nbt& array, Options options);
+  void FromTagListSNBT(std::string& output, const Nbt& listTag, SnbtOptions options);
+  void addArray(std::string& output, const Nbt& array, SnbtOptions options);
   // void FromTagCompoundSNBT(std::string& output, const Nbt& tag, WriteOptions options);
   std::string snbt(const Nbt& root, SnbtOptions options) {
     std::string result;
 
-    snbt::Options snbtOption = {options
-
-    };
     switch (root.tag()) {
     case castle::nbt::NbtTag::EndTag:
       break;
@@ -49,10 +43,10 @@ namespace castle::nbt::snbt {
       break;
     case castle::nbt::NbtTag::CompoundTag:
       result += "{\n";
-      snbtOption.deph++;
-      addTabs(result, snbtOption);
-      FromTagCompoundSNBT(result, root, snbtOption);
-      snbtOption.deph--;
+      options.deph++;
+      addTabs(result, options);
+      FromTagCompoundSNBT(result, root, options);
+      options.deph--;
       result += "\n}";
       break;
     case castle::nbt::NbtTag::IntArrayTag:
@@ -165,7 +159,7 @@ namespace castle::nbt::snbt {
       addTabs(output, options);
     }
   }
-  void FromTagListSNBT(std::string& output, const Nbt& listTag, Options options) {
+  void FromTagListSNBT(std::string& output, const Nbt& listTag, SnbtOptions options) {
 
     const auto& values = listTag.get<NbtTag::ListTag>();
 
@@ -257,7 +251,7 @@ namespace castle::nbt::snbt {
     }
   }
 
-  void addArray(std::string& output, const Nbt& array, Options options) {
+  void addArray(std::string& output, const Nbt& array, SnbtOptions options) {
     switch (array.tag()) {
     case NbtTag::ByteArrayTag: {
 
