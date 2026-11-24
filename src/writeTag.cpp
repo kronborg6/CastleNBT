@@ -41,7 +41,8 @@ namespace castle::nbt {
     if (context == TagContext::ListElement || Tag == NbtTag::EndTag)
       return;
 
-    if (context == TagContext::NamelessRoot) {
+    if (context == TagContext::NamelessRoot ||
+        context == TagContext::NamelessRootAndNonCompoundRoot) {
       data.push_back(tag(Tag));
       return;
     }

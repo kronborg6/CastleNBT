@@ -369,6 +369,10 @@ namespace castle::nbt {
                       std::size_t depth,
                       std::size_t maxDepth) {
     NbtTag nextTag = static_cast<NbtTag>(data[offset]);
+
+    nbt::TagContext ctx = context == TagContext::NamelessRootAndNonCompoundRoot
+                              ? TagContext::NamelessRoot
+                              : TagContext::Named;
     std::string name = "";
     if (context != TagContext::NamelessRootAndNonCompoundRoot) {
 
@@ -377,7 +381,12 @@ namespace castle::nbt {
     std::vector<Nbt> values;
     while (offset < data.size()) {
       if (depth > maxDepth) {
-        throw std::runtime_error("amx Depth reached");
+        throw std::runtime_error("max Depth reached");
+      }
+      if (values.size() == 1) {
+
+        Nbt temp = values.front();
+        return temp;
       }
 
       switch (nextTag) {
@@ -385,28 +394,28 @@ namespace castle::nbt {
         offset++;
         return Nbt::makeCompound(std::move(name), std::move(values));
       case NbtTag::ByteTag:
-        values.push_back(FromTagByte(data, offset, context));
+        values.push_back(FromTagByte(data, offset, ctx));
         break;
       case NbtTag::ShortTag:
-        values.push_back(FromTagShort(data, offset, context));
+        values.push_back(FromTagShort(data, offset, ctx));
         break;
       case NbtTag::IntTag:
-        values.push_back(FromTagInt(data, offset, context));
+        values.push_back(FromTagInt(data, offset, ctx));
         break;
       case NbtTag::LongTag:
-        values.push_back(FromTagLong(data, offset, context));
+        values.push_back(FromTagLong(data, offset, ctx));
         break;
       case NbtTag::FloatTag:
-        values.push_back(FromTagFloat(data, offset, context));
+        values.push_back(FromTagFloat(data, offset, ctx));
         break;
       case NbtTag::DoubleTag:
-        values.push_back(FromTagDouble(data, offset, context));
+        values.push_back(FromTagDouble(data, offset, ctx));
         break;
       case NbtTag::ByteArrayTag:
-        values.push_back(FromTagByteArray(data, offset, context));
+        values.push_back(FromTagByteArray(data, offset, ctx));
         break;
       case NbtTag::StringTag:
-        values.push_back(FromTagString(data, offset, context));
+        values.push_back(FromTagString(data, offset, ctx));
         break;
       case NbtTag::ListTag:
         values.push_back(FromTagList(data, offset, TagContext::Named, depth + 1, maxDepth));
@@ -415,10 +424,10 @@ namespace castle::nbt {
         values.push_back(FromTagCompound(data, offset, TagContext::Named, depth + 1, maxDepth));
         break;
       case NbtTag::IntArrayTag:
-        values.push_back(FromTagIntArray(data, offset, context));
+        values.push_back(FromTagIntArray(data, offset, ctx));
         break;
       case NbtTag::LongArrayTag:
-        values.push_back(FromTagLongArray(data, offset, context));
+        values.push_back(FromTagLongArray(data, offset, ctx));
         break;
       default:
         throw std::runtime_error(std::format("Undefined NBT tag: {}", std::to_underlying(nextTag)));

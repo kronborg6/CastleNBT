@@ -16,6 +16,7 @@
 #include <vector>
 namespace {
   void printHex(const std::vector<std::uint8_t>& data) {
+    return;
     for (const auto byte : data) {
       std::cout << std::format("{:02x} ", byte);
     }

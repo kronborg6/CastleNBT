@@ -276,3 +276,28 @@ TEST(NbtRoundTrip, BareRootInsidePacketStopsAtItsEnd) {
   EXPECT_EQ(std::get<std::int32_t>(root.value()), 7);
   EXPECT_EQ(offset, rootSize);
 }
+
+TEST(NbtRoundTrip, NamelessBareListRoot) {
+  auto list = Nbt::makeList("");
+  list.append(std::int32_t{1});
+  list.append(std::int32_t{2});
+
+  const auto bytes = NbtWriter::writer(list, {.namelessRoot = true, .wrapNonCompoundRoot = false});
+
+  // TAG_List, element type Int, length 2, then 1 and 2 (no name anywhere)
+  const std::vector<std::uint8_t> expected = {0x09, 0x03, 0x00, 0x00, 0x00, 0x02,
+                                              0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02};
+  EXPECT_EQ(bytes, expected);
+
+  const Nbt root = NbtReader::reader(expected, {.namelessRoot = true});
+  EXPECT_EQ(root.tag(), NbtTag::ListTag);
+  EXPECT_EQ(std::get<std::vector<Nbt>>(root.value()).size(), 2u);
+}
+
+TEST(NbtRoundTrip, EndTagAsRootThrows) {
+  // a lone TAG_End is not a document, with or without a name
+  const std::vector<std::uint8_t> bytes = {0x00};
+
+  EXPECT_THROW(NbtReader::reader(bytes), std::runtime_error);
+  EXPECT_THROW(NbtReader::reader(bytes, {.namelessRoot = true}), std::runtime_error);
+}
