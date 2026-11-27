@@ -22,6 +22,8 @@ add_library(castleNBT STATIC
     src/writeNbt.cpp
     src/writer.cpp
     src/writeTag.cpp
+    src/io/json/jsonParser.cpp
+    src/io/json/reader.cpp
     src/snbt.cpp
     src/nbt.cpp
 )

@@ -1,9 +1,12 @@
+#include "../src/io/json/jsonParser.hpp"
 #include "castle/reader.hpp"
 #include "castle/writer.hpp"
 #include <castle/lowlevel/readTag.hpp>
 #include <castle/nbt.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <utility>
@@ -50,7 +53,27 @@ int main(void) {
   Nbt list = Nbt::makeIntArray("numbers", {42, 1, 23, 4512, 11});
 
   root.add(list);
-  /* auto snbt = */ NbtWriter::snbtWriter(root, "./temp/player.snbt");
+  /* auto snbt = */ NbtWriter::snbtWriter(root, "temp/player.snbt");
+
+  const std::filesystem::path path = "./temp/helloWorld.json";
+
+  std::cout << "Working directory: " << std::filesystem::current_path() << '\n';
+
+  std::cout << "Absolute path: " << std::filesystem::absolute(path) << '\n';
+
+  std::cout << "File exists: " << std::filesystem::exists(path) << '\n';
+
+  std::ifstream stream(path);
+
+  if (!stream.is_open()) {
+    throw std::runtime_error("Failed to open JSON file");
+  }
+
+  std::string data{std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
+
+  std::cout << "Bytes read: " << data.size() << '\n';
+  castle::nbt::io::JsonParser p(data);
+  auto temp = p.parse();
 
   // std::cout << snbt << "\n";
 

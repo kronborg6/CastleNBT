@@ -2,7 +2,7 @@
 
 namespace castle::nbt::io {
   enum class Format {
-    Auto,
+    AUTO,
     NBT,
     SNBT,
     JSON
